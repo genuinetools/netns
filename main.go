@@ -40,6 +40,8 @@ var (
 	ipAddr             string
 	mtu                int
 
+	ipfile string
+
 	debug   bool
 	version bool
 )
@@ -50,6 +52,8 @@ func init() {
 	flag.StringVar(&containerInterface, "iface", defaultContainerInterface, "name of interface in the namespace")
 	flag.StringVar(&ipAddr, "ip", "172.19.0.1/16", "ip address for bridge")
 	flag.IntVar(&mtu, "mtu", defaultMTU, "mtu for bridge")
+
+	flag.StringVar(&ipfile, "ipfile", ".ip", "file in which to save the containers ip address")
 
 	flag.BoolVar(&version, "version", false, "print version and exit")
 	flag.BoolVar(&version, "v", false, "print version and exit (shorthand)")
@@ -85,6 +89,8 @@ func main() {
 	if err := json.Unmarshal(b, &h); err != nil {
 		logrus.Fatalf("umarshal stdin as HookState failed: %v", err)
 	}
+
+	logrus.Debugf("Hooks State: %#v", h)
 
 	// Initialize the bridge
 	if err := initBridge(); err != nil {
@@ -138,6 +144,11 @@ func main() {
 	}
 
 	logrus.Infof("Attached veth (%s) to bridge (%s)", localVethPair.Name, bridgeName)
+
+	// save the ip to a file so other hooks can use it
+	if err := ioutil.WriteFile(ipfile, []byte(nsip.String()), 0755); err != nil {
+		logrus.Fatalf("Saving allocated ip address for container to %s failed: %v", ipfile, err)
+	}
 }
 
 func usageAndExit(message string, exitCode int) {

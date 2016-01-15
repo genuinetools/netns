@@ -22,11 +22,14 @@ $ netns --help
         name of interface in the namespace (default "eth0")
   -ip string
         ip address for bridge (default "172.19.0.1/16")
+  -ipfile string
+        file in which to save the containers ip address (default ".ip")
   -mtu int
         mtu for bridge (default 1500)
   -v    print version and exit (shorthand)
   -version
         print version and exit
+
 ```
 
 Place this in the `Hooks.Prestart` field of your `runc` config.
