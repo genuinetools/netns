@@ -91,7 +91,7 @@ func configureInterface(name string, pid int, addr *net.IPNet, gatewayIP string)
 	}
 
 	// Change the interface name to eth0 in the namespace
-	if err := netlink.LinkSetName(iface, defaultContainerInterface); err != nil {
+	if err := netlink.LinkSetName(iface, containerInterface); err != nil {
 		return fmt.Errorf("Renaming interface %s to %s failed: %v", name, defaultContainerInterface, err)
 	}
 
@@ -126,18 +126,18 @@ func configureInterface(name string, pid int, addr *net.IPNet, gatewayIP string)
 }
 
 // vethPair creates a veth pair. Peername is renamed to eth0 in the container.
-func vethPair(suffix string, bridgeName string) (*netlink.Veth, error) {
+func vethPair(pid int, bridgeName string) (*netlink.Veth, error) {
 	br, err := netlink.LinkByName(bridgeName)
 	if err != nil {
 		return nil, err
 	}
 
 	la := netlink.NewLinkAttrs()
-	la.Name = defaultPortPrefix + suffix
+	la.Name = fmt.Sprintf("%s-%d", defaultPortPrefix, pid)
 	la.MasterIndex = br.Attrs().Index
 
 	return &netlink.Veth{
 		LinkAttrs: la,
-		PeerName:  "ethc" + suffix,
+		PeerName:  fmt.Sprintf("ethc%d", pid),
 	}, nil
 }

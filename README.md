@@ -18,8 +18,10 @@ $ netns --help
   -bridge string
         name for bridge (default "netns0")
   -d    run in debug mode
+  -iface string
+        name of interface in the namespace (default "eth0")
   -ip string
-        ip address (default "10.100.55.1/24")
+        ip address for bridge (default "172.19.0.1/16")
   -mtu int
         mtu for bridge (default 1500)
   -v    print version and exit (shorthand)

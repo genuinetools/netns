@@ -29,16 +29,16 @@ const (
 	VERSION = "v0.1.0"
 
 	defaultContainerInterface = "eth0"
-	defaultPortPrefix         = "netnsv0-"
+	defaultPortPrefix         = "netnsv0"
 	defaultBridgeName         = "netns0"
-	containerEthName          = "eth"
 	defaultMTU                = 1500
 )
 
 var (
-	bridgeName string
-	ipAddr     string
-	mtu        int
+	bridgeName         string
+	containerInterface string
+	ipAddr             string
+	mtu                int
 
 	debug   bool
 	version bool
@@ -47,6 +47,7 @@ var (
 func init() {
 	// Parse flags
 	flag.StringVar(&bridgeName, "bridge", defaultBridgeName, "name for bridge")
+	flag.StringVar(&containerInterface, "iface", defaultContainerInterface, "name of interface in the namespace")
 	flag.StringVar(&ipAddr, "ip", "172.19.0.1/16", "ip address for bridge")
 	flag.IntVar(&mtu, "mtu", defaultMTU, "mtu for bridge")
 
@@ -91,7 +92,7 @@ func main() {
 	}
 
 	// Create and attach local name to the bridge
-	localVethPair, err := vethPair(h.ID[:5], bridgeName)
+	localVethPair, err := vethPair(h.Pid, bridgeName)
 	if err != nil {
 		logrus.Fatalf("Getting vethpair failed: %v", err)
 	}
