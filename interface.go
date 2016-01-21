@@ -1,56 +1,90 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"net"
+	"os"
 	"runtime"
 
 	"github.com/Sirupsen/logrus"
 	"github.com/docker/libnetwork/iptables"
+	"github.com/jfrazelle/netns/ipallocator"
+	"github.com/opencontainers/runc/libcontainer/configs"
 	"github.com/vishvananda/netlink"
 	"github.com/vishvananda/netns"
 )
 
-// getIfaceAddr returns the IPv4 address of a network interface.
-func getIfaceAddr(name string) (*net.IPNet, error) {
-	iface, err := netlink.LinkByName(name)
+func createNetwork() error {
+	// Get hook data
+	h, err := readHookData()
 	if err != nil {
-		return nil, err
-	}
-	addrs, err := netlink.AddrList(iface, netlink.FAMILY_V4)
-	if err != nil {
-		return nil, err
-	}
-	if len(addrs) == 0 {
-		return nil, fmt.Errorf("Interface %s has no IP addresses", name)
-	}
-	if len(addrs) > 1 {
-		logrus.Infof("Interface [ %#v ] has more than 1 IPv4 address. Defaulting to using [ %#v ]\n", name, addrs[0].IP)
-	}
-	return addrs[0].IPNet, nil
-}
-
-// natOut adds NAT rules for iptables.
-func natOut(cidr string, action iptables.Action) error {
-	masquerade := []string{
-		"POSTROUTING", "-t", "nat",
-		"-s", cidr,
-		"-j", "MASQUERADE",
+		return err
 	}
 
-	incl := append([]string{string(action)}, masquerade...)
-	if _, err := iptables.Raw(
-		append([]string{"-C"}, masquerade...)...,
-	); err != nil || action == iptables.Delete {
-		if output, err := iptables.Raw(incl...); err != nil {
-			return err
-		} else if len(output) > 0 {
-			return &iptables.ChainError{
-				Chain:  "POSTROUTING",
-				Output: output,
-			}
-		}
+	// Initialize the bridge
+	if err := initBridge(); err != nil {
+		return err
 	}
+
+	// Create and attach local name to the bridge
+	localVethPair, err := vethPair(h.Pid, bridgeName)
+	if err != nil {
+		return fmt.Errorf("Getting vethpair failed for pid %d: %v", h.Pid, err)
+	}
+
+	if err := netlink.LinkAdd(localVethPair); err != nil {
+		return fmt.Errorf("Create veth pair named [ %#v ] failed: %v", localVethPair, err)
+	}
+
+	// Get the peer link
+	peer, err := netlink.LinkByName(localVethPair.PeerName)
+	if err != nil {
+		return fmt.Errorf("Getting peer interface (%s) failed: %v", localVethPair.PeerName, err)
+	}
+
+	// Put peer interface into the network namespace of specified PID
+	if err := netlink.LinkSetNsPid(peer, h.Pid); err != nil {
+		return fmt.Errorf("Adding peer interface to network namespace of pid %d failed: %v", h.Pid, err)
+	}
+
+	// Bring the veth pair up
+	if err := netlink.LinkSetUp(localVethPair); err != nil {
+		return fmt.Errorf("Bringing local veth pair [ %#v ] up failed: %v", localVethPair, err)
+	}
+
+	// Allocate an ip address for the interface
+	ip, ipNet, err := net.ParseCIDR(ipAddr)
+	if err != nil {
+		return fmt.Errorf("Parsing CIDR for %s failed: %v", ipAddr, err)
+	}
+
+	ipAllocator, err := ipallocator.New(bridgeName, stateDir, ipNet)
+	if err != nil {
+		return err
+	}
+	nsip, err := ipAllocator.Allocate(h.Pid)
+	if err != nil {
+		return fmt.Errorf("Allocating ip address failed: %v", err)
+	}
+
+	newIP := &net.IPNet{
+		IP:   nsip,
+		Mask: ipNet.Mask,
+	}
+	// Configure the interface in the network namespace
+	if err := configureInterface(localVethPair.PeerName, h.Pid, newIP, ip.String()); err != nil {
+		return err
+	}
+
+	logrus.Infof("Attached veth (%s) to bridge (%s)", localVethPair.Name, bridgeName)
+
+	// save the ip to a file so other hooks can use it
+	if err := ioutil.WriteFile(ipfile, []byte(nsip.String()), 0755); err != nil {
+		return fmt.Errorf("Saving allocated ip address for container to %s failed: %v", ipfile, err)
+	}
+
 	return nil
 }
 
@@ -123,6 +157,67 @@ func configureInterface(name string, pid int, addr *net.IPNet, gatewayIP string)
 	}
 
 	return nil
+}
+
+// getIfaceAddr returns the IPv4 address of a network interface.
+func getIfaceAddr(name string) (*net.IPNet, error) {
+	iface, err := netlink.LinkByName(name)
+	if err != nil {
+		return nil, err
+	}
+	addrs, err := netlink.AddrList(iface, netlink.FAMILY_V4)
+	if err != nil {
+		return nil, err
+	}
+	if len(addrs) == 0 {
+		return nil, fmt.Errorf("Interface %s has no IP addresses", name)
+	}
+	if len(addrs) > 1 {
+		logrus.Infof("Interface [ %#v ] has more than 1 IPv4 address. Defaulting to using [ %#v ]\n", name, addrs[0].IP)
+	}
+	return addrs[0].IPNet, nil
+}
+
+// natOut adds NAT rules for iptables.
+func natOut(cidr string, action iptables.Action) error {
+	masquerade := []string{
+		"POSTROUTING", "-t", "nat",
+		"-s", cidr,
+		"-j", "MASQUERADE",
+	}
+
+	incl := append([]string{string(action)}, masquerade...)
+	if _, err := iptables.Raw(
+		append([]string{"-C"}, masquerade...)...,
+	); err != nil || action == iptables.Delete {
+		if output, err := iptables.Raw(incl...); err != nil {
+			return err
+		} else if len(output) > 0 {
+			return &iptables.ChainError{
+				Chain:  "POSTROUTING",
+				Output: output,
+			}
+		}
+	}
+	return nil
+}
+
+// readHookData decodes stdin as HookState
+func readHookData() (hook configs.HookState, err error) {
+	// Read hook data from stdin
+	b, err := ioutil.ReadAll(os.Stdin)
+	if err != nil {
+		return hook, fmt.Errorf("Reading hook data from stdin failed: %v", err)
+	}
+
+	// Umarshal the hook state
+	if err := json.Unmarshal(b, &hook); err != nil {
+		return hook, fmt.Errorf("Unmarshal stdin as HookState failed: %v", err)
+	}
+
+	logrus.Debugf("Hooks State: %#v", hook)
+	return hook, nil
+
 }
 
 // vethPair creates a veth pair. Peername is renamed to eth0 in the container.

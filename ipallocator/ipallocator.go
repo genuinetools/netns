@@ -16,8 +16,10 @@ import (
 )
 
 var (
-	dbfile     = "bolt.db"
-	ipDBBucket = []byte("ipallocator")
+	// DBFile is the file the bolt ndatabase is stored in.
+	DBFile = "bolt.db"
+	// IPBucket is the bolt database bucket for ip key value store.
+	IPBucket = []byte("ipallocator")
 )
 
 // IPAllocator defines the data structure for allocating a new IP.
@@ -34,7 +36,10 @@ func New(bridgeName, stateDir string, ipNet *net.IPNet) (*IPAllocator, error) {
 	}
 
 	// open the database
-	dbpath := path.Join(stateDir, dbfile)
+	// this will block until closed which is file for our use case of assigning
+	// one IP and being done.
+	// TODO: make this more graceful if someone else wants to use this as a lib.
+	dbpath := path.Join(stateDir, DBFile)
 	db, err := bolt.Open(dbpath, 0666, nil)
 	if err != nil {
 		return nil, fmt.Errorf("Opening database at %s failed: %v", dbpath, err)
@@ -42,8 +47,8 @@ func New(bridgeName, stateDir string, ipNet *net.IPNet) (*IPAllocator, error) {
 
 	// create the ip allocator bucket if it does not exist
 	if err := db.Update(func(tx *bolt.Tx) error {
-		if _, err := tx.CreateBucketIfNotExists(ipDBBucket); err != nil {
-			return fmt.Errorf("Creating bucket %s failed: %v", ipDBBucket, err)
+		if _, err := tx.CreateBucketIfNotExists(IPBucket); err != nil {
+			return fmt.Errorf("Creating bucket %s failed: %v", IPBucket, err)
 		}
 		return nil
 	}); err != nil {
@@ -75,7 +80,7 @@ func (i *IPAllocator) Allocate(pid int) (ip net.IP, err error) {
 	// find the last IP used by the allocator
 	lastip := i.IPNet.IP
 	if err := i.db.View(func(tx *bolt.Tx) error {
-		k, _ := tx.Bucket(ipDBBucket).Cursor().Last()
+		k, _ := tx.Bucket(IPBucket).Cursor().Last()
 
 		if string(k) != "" {
 			lastip = net.ParseIP(string(k))
@@ -119,7 +124,7 @@ func (i *IPAllocator) Allocate(pid int) (ip net.IP, err error) {
 
 	// save the new ip in the database
 	if err := i.db.Update(func(tx *bolt.Tx) error {
-		return tx.Bucket(ipDBBucket).Put([]byte(ip.String()), []byte(strconv.Itoa(pid)))
+		return tx.Bucket(IPBucket).Put([]byte(ip.String()), []byte(strconv.Itoa(pid)))
 	}); err != nil {
 		return nil, fmt.Errorf("Adding ip %s to database for %d failed: %v", ip.String(), pid, err)
 	}
