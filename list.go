@@ -11,6 +11,7 @@ import (
 	"github.com/boltdb/bolt"
 	"github.com/jfrazelle/netns/ipallocator"
 	"github.com/vishvananda/netlink"
+	"github.com/vishvananda/netns"
 )
 
 type network struct {
@@ -18,6 +19,7 @@ type network struct {
 	ip       net.IP
 	pid      int
 	status   string
+	fd       netns.NsHandle
 }
 
 func listNetworks() error {
@@ -58,9 +60,9 @@ func listNetworks() error {
 				return fmt.Errorf("Getting vethpair failed for pid %d: %v", n.pid, err)
 			}
 
-			// try to check if the veth link exists
-			// if a netns exited, it would destroy it along with the exit
-			if _, err := netlink.LinkByName(n.vethPair.Attrs().Name); err.Error() == "Link not found" {
+			// try to get the namespace handle
+			n.fd, _ = netns.GetFromPid(n.pid)
+			if n.fd <= 0 {
 				n.status = "destroyed"
 			}
 
@@ -72,9 +74,9 @@ func listNetworks() error {
 	}
 
 	w := tabwriter.NewWriter(os.Stdout, 20, 1, 3, ' ', 0)
-	fmt.Fprint(w, "IP\tLOCAL VETH\tPID\tSTATUS\n")
+	fmt.Fprint(w, "IP\tLOCAL VETH\tPID\tSTATUS\tNS FD\n")
 	for _, n := range networks {
-		fmt.Fprintf(w, "%s\t%s\t%d\t%s\n", n.ip.String(), n.vethPair.Attrs().Name, n.pid, n.status)
+		fmt.Fprintf(w, "%s\t%s\t%d\t%s\t%d\n", n.ip.String(), n.vethPair.Attrs().Name, n.pid, n.status, n.fd)
 	}
 	w.Flush()
 
