@@ -9,6 +9,7 @@ import (
 	"os"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/jfrazelle/netns/ipallocator"
 	"github.com/opencontainers/runc/libcontainer/configs"
 	"github.com/vishvananda/netlink"
 )
@@ -32,6 +33,7 @@ const (
 	defaultPortPrefix         = "netnsv0"
 	defaultBridgeName         = "netns0"
 	defaultMTU                = 1500
+	defaultStateDir           = "/run/github.com/jfrazelle/netns"
 )
 
 var (
@@ -39,6 +41,7 @@ var (
 	containerInterface string
 	ipAddr             string
 	mtu                int
+	stateDir           string
 
 	ipfile string
 
@@ -52,6 +55,7 @@ func init() {
 	flag.StringVar(&containerInterface, "iface", defaultContainerInterface, "name of interface in the namespace")
 	flag.StringVar(&ipAddr, "ip", "172.19.0.1/16", "ip address for bridge")
 	flag.IntVar(&mtu, "mtu", defaultMTU, "mtu for bridge")
+	flag.StringVar(&stateDir, "state-dir", defaultStateDir, "directory for saving state, used for ip allocation")
 
 	flag.StringVar(&ipfile, "ipfile", ".ip", "file in which to save the containers ip address")
 
@@ -128,8 +132,12 @@ func main() {
 	if err != nil {
 		logrus.Fatalf("Parsing CIDR for %s failed: %v", ipAddr, err)
 	}
-	ipNet.IP = ip
-	nsip, err := allocateIP(bridgeName, ip, ipNet)
+
+	ipAllocator, err := ipallocator.New(bridgeName, stateDir, ipNet)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	nsip, err := ipAllocator.Allocate(h.Pid)
 	if err != nil {
 		logrus.Fatalf("Allocating ip address failed: %v", err)
 	}
