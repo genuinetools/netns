@@ -45,3 +45,4 @@ Icon
 .Trashes
 
 netns
+!vendor/github.com/*/netns
