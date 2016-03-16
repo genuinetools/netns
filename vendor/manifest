@@ -1,0 +1,55 @@
+{
+	"version": 0,
+	"dependencies": [
+		{
+			"importpath": "github.com/Sirupsen/logrus",
+			"repository": "https://github.com/Sirupsen/logrus",
+			"revision": "a26f43589d737684363ff856c5a0f9f24b946510",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/boltdb/bolt",
+			"repository": "https://github.com/boltdb/bolt",
+			"revision": "0fd4c0547d204c7b1cad6db6f3adad5f2cf453e5",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/docker/libnetwork/iptables",
+			"repository": "https://github.com/docker/libnetwork",
+			"revision": "4298c7517d05c1aad953aca34f9f75b07f0ebe2d",
+			"branch": "master",
+			"path": "/iptables"
+		},
+		{
+			"importpath": "github.com/erikh/ping",
+			"repository": "https://github.com/erikh/ping",
+			"revision": "d731d249e12a103e22d5d4cdf41bf37062623ea4",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/godbus/dbus",
+			"repository": "https://github.com/godbus/dbus",
+			"revision": "e2cf28118e66a6a63db46cf6088a35d2054d3bb0",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/opencontainers/runc/libcontainer/configs",
+			"repository": "https://github.com/opencontainers/runc",
+			"revision": "69fe79de1087d11bcae33bc776d7ce3875330860",
+			"branch": "master",
+			"path": "/libcontainer/configs"
+		},
+		{
+			"importpath": "github.com/vishvananda/netlink",
+			"repository": "https://github.com/vishvananda/netlink",
+			"revision": "4fdf23c882685717a2a750114bdc904afeafc16b",
+			"branch": "master"
+		},
+		{
+			"importpath": "github.com/vishvananda/netns",
+			"repository": "https://github.com/vishvananda/netns",
+			"revision": "b87167f660cd594f2fc542c2a40027c40754652c",
+			"branch": "master"
+		}
+	]
+}
