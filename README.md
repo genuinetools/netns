@@ -1,6 +1,6 @@
 # netns
 
-[![Circle CI](https://circleci.com/gh/jfrazelle/netns.svg?style=svg)](https://circleci.com/gh/jfrazelle/netns)
+[![Travis CI](https://travis-ci.org/jfrazelle/netns.svg?branch=master)](https://travis-ci.org/jfrazelle/netns)
 
 Runc hook for setting up default bridge networking.
 
