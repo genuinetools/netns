@@ -94,6 +94,10 @@ func main() {
 		if err := listNetworks(); err != nil {
 			logrus.Fatal(err)
 		}
+	case "destroy":
+		if err := destroyNetwork(); err != nil {
+			logrus.Fatal(err)
+		}
 	default:
 		if err := createNetwork(); err != nil {
 			logrus.Fatal(err)
