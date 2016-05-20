@@ -88,6 +88,15 @@ func createNetwork() error {
 	return nil
 }
 
+func destroyNetwork() error {
+	// Destroy the bridge
+	if err := deleteBridge(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // configureInterface configures the network interface in the network namespace.
 func configureInterface(name string, pid int, addr *net.IPNet, gatewayIP string) error {
 	// Lock the OS Thread so we don't accidentally switch namespaces

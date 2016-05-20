@@ -74,7 +74,7 @@ func init() {
 	}
 
 	if version || arg == "version" {
-		fmt.Printf("%s", VERSION)
+		fmt.Printf("%s\n", VERSION)
 		os.Exit(0)
 	}
 
@@ -94,10 +94,16 @@ func main() {
 		if err := listNetworks(); err != nil {
 			logrus.Fatal(err)
 		}
-	default:
+	case "delete":
+		if err := destroyNetwork(); err != nil {
+			logrus.Fatal(err)
+		}
+	case "":
 		if err := createNetwork(); err != nil {
 			logrus.Fatal(err)
 		}
+	default:
+		logrus.Fatalf("Unknown command %s", arg)
 	}
 }
 
