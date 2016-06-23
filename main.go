@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/Sirupsen/logrus"
 )
@@ -18,6 +19,18 @@ const (
 
  Runc hook for setting up default bridge networking.
  Version: %s
+
+ Netns provides the following commands. Usage format:
+
+    netns [-flag value] [-flag value] command
+
+  Where command is one of:
+
+    createbr, delbr, [ls|list], delete
+
+  If command is blank (e.g. when called via a hook) it
+  will create a network endpoint in the expected net
+  namespace details for that PID.
 
 `
 	// VERSION is the binary version.
@@ -62,11 +75,22 @@ func init() {
 		fmt.Fprint(os.Stderr, fmt.Sprintf(BANNER, VERSION))
 		flag.PrintDefaults()
 	}
+}
 
+func main() {
 	flag.Parse()
 
-	if flag.NArg() >= 1 {
+	if flag.NArg() == 1 {
 		arg = flag.Args()[0]
+	}
+	if flag.NArg() > 1 {
+		ignored := []string{"Ignoring parameters:"}
+		argList := flag.Args()[1:]
+		for i := range argList {
+			ignored = append(ignored, argList[i])
+		}
+		logrus.Error(strings.Join(ignored, " "))
+		usageAndExit("Flags must be placed before command", 1)
 	}
 
 	if arg == "help" {
@@ -82,9 +106,7 @@ func init() {
 	if debug {
 		logrus.SetLevel(logrus.DebugLevel)
 	}
-}
 
-func main() {
 	switch arg {
 	case "ls":
 		if err := listNetworks(); err != nil {
@@ -96,6 +118,14 @@ func main() {
 		}
 	case "delete":
 		if err := destroyNetwork(); err != nil {
+			logrus.Fatal(err)
+		}
+	case "createbr":
+		if err := initBridge(); err != nil {
+			logrus.Fatal(err)
+		}
+	case "delbr":
+		if err := deleteBridge(); err != nil {
 			logrus.Fatal(err)
 		}
 	case "":
