@@ -54,8 +54,13 @@ func createNetwork() error {
 		return fmt.Errorf("Bringing local veth pair [ %#v ] up failed: %v", localVethPair, err)
 	}
 
+	// check the bridge IPNet as it may be different than the default
+	brNet, err := getIfaceAddr(bridgeName)
+	if err != nil {
+		return fmt.Errorf("Retrieving IP/network of bridge %s failed: %v", bridgeName, err)
+	}
 	// Allocate an ip address for the interface
-	ip, ipNet, err := net.ParseCIDR(ipAddr)
+	ip, ipNet, err := net.ParseCIDR(brNet.String())
 	if err != nil {
 		return fmt.Errorf("Parsing CIDR for %s failed: %v", ipAddr, err)
 	}
