@@ -42,6 +42,9 @@ func New(bridgeName, stateDir string, ipNet *net.IPNet) (*IPAllocator, error) {
 	dbpath := path.Join(stateDir, DBFile)
 	db, err := bolt.Open(dbpath, 0666, nil)
 	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, fmt.Errorf("You have not allocated any IPs")
+		}
 		return nil, fmt.Errorf("Opening database at %s failed: %v", dbpath, err)
 	}
 

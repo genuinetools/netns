@@ -27,6 +27,9 @@ func listNetworks() error {
 	dbpath := path.Join(stateDir, ipallocator.DBFile)
 	db, err := bolt.Open(dbpath, 0666, nil)
 	if err != nil {
+		if os.IsNotExist(err) {
+			return fmt.Errorf("You have not allocated any IPs")
+		}
 		return fmt.Errorf("Opening database at %s failed: %v", dbpath, err)
 	}
 	defer db.Close()
