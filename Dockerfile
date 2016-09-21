@@ -1,31 +1,25 @@
-FROM alpine
-MAINTAINER Jessica Frazelle <jess@docker.com>
+FROM alpine:latest
+MAINTAINER Jessica Frazelle <jess@linux.com>
 
 ENV PATH /go/bin:/usr/local/go/bin:$PATH
 ENV GOPATH /go
 
-RUN	apk update && apk add \
-	ca-certificates \
-	&& rm -rf /var/cache/apk/*
+RUN	apk add --no-cache \
+	ca-certificates
 
 COPY . /go/src/github.com/jfrazelle/netns
 
-RUN buildDeps=' \
+RUN set -x \
+	&& apk add --no-cache --virtual .build-deps \
 		go \
 		git \
 		gcc \
 		libc-dev \
 		libgcc \
-                linux-headers \
-	' \
-	set -x \
-	&& apk update \
-	&& apk add $buildDeps \
+		linux-headers \
 	&& cd /go/src/github.com/jfrazelle/netns \
-	&& go get -d -v github.com/jfrazelle/netns \
 	&& go build -o /usr/bin/netns . \
-	&& apk del $buildDeps \
-	&& rm -rf /var/cache/apk/* \
+	&& apk del .build-deps \
 	&& rm -rf /go \
 	&& echo "Build complete."
 
