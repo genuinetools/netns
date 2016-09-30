@@ -40,7 +40,7 @@ const (
 	defaultPortPrefix         = "netnsv0"
 	defaultBridgeName         = "netns0"
 	defaultMTU                = 1500
-	defaultStateDir           = "/run/github.com/jfrazelle/netns"
+	defaultStateDir           = "/run/github.com/jessfraz/netns"
 )
 
 var (

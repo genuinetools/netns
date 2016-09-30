@@ -10,7 +10,7 @@ import (
 
 	"github.com/Sirupsen/logrus"
 	"github.com/docker/libnetwork/iptables"
-	"github.com/jfrazelle/netns/ipallocator"
+	"github.com/jessfraz/netns/ipallocator"
 	"github.com/opencontainers/runc/libcontainer/configs"
 	"github.com/vishvananda/netlink"
 	"github.com/vishvananda/netns"
