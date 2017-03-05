@@ -4,52 +4,165 @@
 		{
 			"importpath": "github.com/Sirupsen/logrus",
 			"repository": "https://github.com/Sirupsen/logrus",
-			"revision": "a26f43589d737684363ff856c5a0f9f24b946510",
-			"branch": "master"
+			"vcs": "git",
+			"revision": "0208149b40d863d2c1a2f8fe5753096a9cf2cc8b",
+			"branch": "master",
+			"notests": true
 		},
 		{
 			"importpath": "github.com/boltdb/bolt",
 			"repository": "https://github.com/boltdb/bolt",
-			"revision": "0fd4c0547d204c7b1cad6db6f3adad5f2cf453e5",
-			"branch": "master"
+			"vcs": "git",
+			"revision": "e9cf4fae01b5a8ff89d0ec6b32f0d9c9f79aefdd",
+			"branch": "master",
+			"notests": true
 		},
 		{
 			"importpath": "github.com/docker/libnetwork/iptables",
 			"repository": "https://github.com/docker/libnetwork",
-			"revision": "4298c7517d05c1aad953aca34f9f75b07f0ebe2d",
+			"vcs": "git",
+			"revision": "1a019214c9cb80bd56219e5d6994a22caf302895",
 			"branch": "master",
-			"path": "/iptables"
+			"path": "/iptables",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/docker/libnetwork/vendor/github.com/Sirupsen/logrus",
+			"repository": "https://github.com/docker/libnetwork",
+			"vcs": "git",
+			"revision": "1a019214c9cb80bd56219e5d6994a22caf302895",
+			"branch": "master",
+			"path": "vendor/github.com/Sirupsen/logrus",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/docker/libnetwork/vendor/github.com/godbus/dbus",
+			"repository": "https://github.com/docker/libnetwork",
+			"vcs": "git",
+			"revision": "1a019214c9cb80bd56219e5d6994a22caf302895",
+			"branch": "master",
+			"path": "vendor/github.com/godbus/dbus",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/docker/libnetwork/vendor/golang.org/x/sys/unix",
+			"repository": "https://github.com/docker/libnetwork",
+			"vcs": "git",
+			"revision": "1a019214c9cb80bd56219e5d6994a22caf302895",
+			"branch": "master",
+			"path": "vendor/golang.org/x/sys/unix",
+			"notests": true
 		},
 		{
 			"importpath": "github.com/erikh/ping",
 			"repository": "https://github.com/erikh/ping",
+			"vcs": "git",
 			"revision": "d731d249e12a103e22d5d4cdf41bf37062623ea4",
-			"branch": "master"
+			"branch": "master",
+			"notests": true
 		},
 		{
 			"importpath": "github.com/godbus/dbus",
 			"repository": "https://github.com/godbus/dbus",
-			"revision": "e2cf28118e66a6a63db46cf6088a35d2054d3bb0",
-			"branch": "master"
+			"vcs": "git",
+			"revision": "fe0e1d54eaeda11a9979659a8d32f459e88bee75",
+			"branch": "master",
+			"notests": true
 		},
 		{
 			"importpath": "github.com/opencontainers/runc/libcontainer/configs",
 			"repository": "https://github.com/opencontainers/runc",
-			"revision": "69fe79de1087d11bcae33bc776d7ce3875330860",
+			"vcs": "git",
+			"revision": "291bf601105c97dc1aa631fdfb7fca63c947319b",
 			"branch": "master",
-			"path": "/libcontainer/configs"
+			"path": "/libcontainer/configs",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/opencontainers/runc/libcontainer/selinux",
+			"repository": "https://github.com/opencontainers/runc",
+			"vcs": "git",
+			"revision": "291bf601105c97dc1aa631fdfb7fca63c947319b",
+			"branch": "master",
+			"path": "libcontainer/selinux",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/opencontainers/runc/libcontainer/system",
+			"repository": "https://github.com/opencontainers/runc",
+			"vcs": "git",
+			"revision": "291bf601105c97dc1aa631fdfb7fca63c947319b",
+			"branch": "master",
+			"path": "libcontainer/system",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/opencontainers/runc/vendor/github.com/Sirupsen/logrus",
+			"repository": "https://github.com/opencontainers/runc",
+			"vcs": "git",
+			"revision": "291bf601105c97dc1aa631fdfb7fca63c947319b",
+			"branch": "master",
+			"path": "vendor/github.com/Sirupsen/logrus",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/opencontainers/runc/vendor/github.com/opencontainers/runtime-spec/specs-go",
+			"repository": "https://github.com/opencontainers/runc",
+			"vcs": "git",
+			"revision": "291bf601105c97dc1aa631fdfb7fca63c947319b",
+			"branch": "master",
+			"path": "vendor/github.com/opencontainers/runtime-spec/specs-go",
+			"notests": true
+		},
+		{
+			"importpath": "github.com/opencontainers/runtime-spec/specs-go",
+			"repository": "https://github.com/opencontainers/runtime-spec",
+			"vcs": "git",
+			"revision": "d87ec6945fa5ff5c0553056c5510d46fe3490203",
+			"branch": "master",
+			"path": "/specs-go",
+			"notests": true
 		},
 		{
 			"importpath": "github.com/vishvananda/netlink",
 			"repository": "https://github.com/vishvananda/netlink",
-			"revision": "4fdf23c882685717a2a750114bdc904afeafc16b",
-			"branch": "master"
+			"vcs": "git",
+			"revision": "fe3b5664d23a11b52ba59bece4ff29c52772a56b",
+			"branch": "master",
+			"notests": true
 		},
 		{
 			"importpath": "github.com/vishvananda/netns",
 			"repository": "https://github.com/vishvananda/netns",
-			"revision": "b87167f660cd594f2fc542c2a40027c40754652c",
-			"branch": "master"
+			"vcs": "git",
+			"revision": "54f0e4339ce73702a0607f49922aaa1e749b418d",
+			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "golang.org/x/sys/unix",
+			"repository": "https://go.googlesource.com/sys",
+			"vcs": "git",
+			"revision": "e48874b42435b4347fc52bdee0424a52abc974d7",
+			"branch": "master",
+			"path": "/unix",
+			"notests": true
+		},
+		{
+			"importpath": "gopkg.in/airbrake/gobrake.v2",
+			"repository": "https://gopkg.in/airbrake/gobrake.v2",
+			"vcs": "git",
+			"revision": "668876711219e8b0206e2994bf0a59d889c775aa",
+			"branch": "master",
+			"notests": true
+		},
+		{
+			"importpath": "gopkg.in/gemnasium/logrus-airbrake-hook.v2",
+			"repository": "https://gopkg.in/gemnasium/logrus-airbrake-hook.v2",
+			"vcs": "git",
+			"revision": "bfee1239d796830ca346767650cce5ba90d58c57",
+			"branch": "master",
+			"notests": true
 		}
 	]
 }

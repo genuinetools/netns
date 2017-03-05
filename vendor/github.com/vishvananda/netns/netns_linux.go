@@ -19,6 +19,9 @@ var SYS_SETNS = map[string]uintptr{
 	"amd64":   308,
 	"arm64":   268,
 	"arm":     375,
+	"mips":    4344,
+	"mipsle":  4344,
+	"ppc64":   350,
 	"ppc64le": 350,
 	"s390x":   339,
 }[runtime.GOARCH]
@@ -181,6 +184,8 @@ func getPidForContainer(id string) (int, error) {
 		filepath.Join(cgroupRoot, cgroupThis, "docker", id, "tasks"),
 		// Even more recent docker versions under systemd use docker-<id>.scope/
 		filepath.Join(cgroupRoot, "system.slice", "docker-"+id+".scope", "tasks"),
+		// Even more recent docker versions under cgroup/systemd/docker/<id>/
+		filepath.Join(cgroupRoot, "..", "systemd", "docker", id, "tasks"),
 	}
 
 	var filename string
