@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/Sirupsen/logrus"
+	"github.com/jessfraz/netns/version"
 )
 
 const (
@@ -33,8 +34,6 @@ const (
   namespace details for that PID.
 
 `
-	// VERSION is the binary version.
-	VERSION = "v0.1.0"
 
 	defaultContainerInterface = "eth0"
 	defaultPortPrefix         = "netnsv0"
@@ -53,8 +52,8 @@ var (
 
 	ipfile string
 
-	debug   bool
-	version bool
+	debug bool
+	vrsn  bool
 )
 
 func init() {
@@ -67,12 +66,12 @@ func init() {
 
 	flag.StringVar(&ipfile, "ipfile", ".ip", "file in which to save the containers ip address")
 
-	flag.BoolVar(&version, "version", false, "print version and exit")
-	flag.BoolVar(&version, "v", false, "print version and exit (shorthand)")
+	flag.BoolVar(&vrsn, "version", false, "print version and exit")
+	flag.BoolVar(&vrsn, "v", false, "print version and exit (shorthand)")
 	flag.BoolVar(&debug, "d", false, "run in debug mode")
 
 	flag.Usage = func() {
-		fmt.Fprint(os.Stderr, fmt.Sprintf(BANNER, VERSION))
+		fmt.Fprint(os.Stderr, fmt.Sprintf(BANNER, version.VERSION))
 		flag.PrintDefaults()
 	}
 }
@@ -97,8 +96,8 @@ func main() {
 		usageAndExit("", 0)
 	}
 
-	if version || arg == "version" {
-		fmt.Printf("%s\n", VERSION)
+	if vrsn || arg == "version" {
+		fmt.Printf("netns version %s, build %s", version.VERSION, version.GITCOMMIT)
 		os.Exit(0)
 	}
 
