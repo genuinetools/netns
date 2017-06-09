@@ -10,6 +10,14 @@ Runc hook for setting up default bridge networking.
 
 - **linux** [386](https://github.com/jessfraz/netns/releases/download/v0.2.1/netns-linux-386) / [amd64](https://github.com/jessfraz/netns/releases/download/v0.2.1/netns-linux-amd64) / [arm](https://github.com/jessfraz/netns/releases/download/v0.2.1/netns-linux-arm) / [arm64](https://github.com/jessfraz/netns/releases/download/v0.2.1/netns-linux-arm64)
 
+#### Via Go
+
+```bash
+$ go get github.com/jessfraz/netns
+```
+
+## Usage
+
 ```console
 $ netns --help
             _
