@@ -49,11 +49,7 @@ func initBridge() error {
 	}
 
 	// Bring the bridge up
-	if err := netlink.LinkSetUp(br); err != nil {
-		return err
-	}
-
-	return nil
+	return netlink.LinkSetUp(br)
 }
 
 // deleteBridge deletes the bridge.

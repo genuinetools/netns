@@ -95,11 +95,7 @@ func createNetwork() error {
 
 func destroyNetwork() error {
 	// Destroy the bridge
-	if err := deleteBridge(); err != nil {
-		return err
-	}
-
-	return nil
+	return deleteBridge()
 }
 
 // configureInterface configures the network interface in the network namespace.
