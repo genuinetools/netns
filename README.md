@@ -8,7 +8,7 @@ Runc hook for setting up default bridge networking.
 
 #### Binaries
 
-- **linux** [386](https://github.com/jessfraz/netns/releases/download/v0.2.2/netns-linux-386) / [amd64](https://github.com/jessfraz/netns/releases/download/v0.2.2/netns-linux-amd64) / [arm](https://github.com/jessfraz/netns/releases/download/v0.2.2/netns-linux-arm) / [arm64](https://github.com/jessfraz/netns/releases/download/v0.2.2/netns-linux-arm64)
+- **linux** [386](https://github.com/jessfraz/netns/releases/download/v0.2.3/netns-linux-386) / [amd64](https://github.com/jessfraz/netns/releases/download/v0.2.3/netns-linux-amd64) / [arm](https://github.com/jessfraz/netns/releases/download/v0.2.3/netns-linux-arm) / [arm64](https://github.com/jessfraz/netns/releases/download/v0.2.3/netns-linux-arm64)
 
 #### Via Go
 
@@ -69,7 +69,7 @@ $ sudo netns ls
 IP                  LOCAL VETH          PID                 STATUS
 172.19.0.3          netnsv0-21635       21635               running
 172.19.0.4          netnsv0-21835       21835               running
-172.19.0.5          netnsv0.2.294       22094               running
+172.19.0.5          netnsv0.2.394       22094               running
 172.19.0.6          netnsv0-25996       25996               running
 ```
 
