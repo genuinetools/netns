@@ -69,7 +69,7 @@ $ sudo netns ls
 IP                  LOCAL VETH          PID                 STATUS
 172.19.0.3          netnsv0-21635       21635               running
 172.19.0.4          netnsv0-21835       21835               running
-172.19.0.5          netnsv0.2.494       22094               running
+172.19.0.5          netnsv0-22094       22094               running
 172.19.0.6          netnsv0-25996       25996               running
 ```
 
