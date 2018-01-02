@@ -6,8 +6,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/jessfraz/netns/version"
+	"github.com/sirupsen/logrus"
 )
 
 const (

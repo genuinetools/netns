@@ -10,7 +10,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/Sirupsen/logrus"
+	"github.com/sirupsen/logrus"
 )
 
 // Action signifies the iptable action.
@@ -50,8 +50,7 @@ var (
 	bestEffortLock sync.Mutex
 	// ErrIptablesNotFound is returned when the rule is not found.
 	ErrIptablesNotFound = errors.New("Iptables not found")
-	probeOnce           sync.Once
-	firewalldOnce       sync.Once
+	initOnce            sync.Once
 )
 
 // ChainInfo defines the iptables chain.
@@ -86,22 +85,32 @@ func initFirewalld() {
 	}
 }
 
+func detectIptables() {
+	path, err := exec.LookPath("iptables")
+	if err != nil {
+		return
+	}
+	iptablesPath = path
+	supportsXlock = exec.Command(iptablesPath, "--wait", "-L", "-n").Run() == nil
+	mj, mn, mc, err := GetVersion()
+	if err != nil {
+		logrus.Warnf("Failed to read iptables version: %v", err)
+		return
+	}
+	supportsCOpt = supportsCOption(mj, mn, mc)
+}
+
+func initDependencies() {
+	probe()
+	initFirewalld()
+	detectIptables()
+}
+
 func initCheck() error {
+	initOnce.Do(initDependencies)
+
 	if iptablesPath == "" {
-		probeOnce.Do(probe)
-		firewalldOnce.Do(initFirewalld)
-		path, err := exec.LookPath("iptables")
-		if err != nil {
-			return ErrIptablesNotFound
-		}
-		iptablesPath = path
-		supportsXlock = exec.Command(iptablesPath, "--wait", "-L", "-n").Run() == nil
-		mj, mn, mc, err := GetVersion()
-		if err != nil {
-			logrus.Warnf("Failed to read iptables version: %v", err)
-			return nil
-		}
-		supportsCOpt = supportsCOption(mj, mn, mc)
+		return ErrIptablesNotFound
 	}
 	return nil
 }
@@ -142,11 +151,11 @@ func ProgramChain(c *ChainInfo, bridgeName string, hairpinMode, enable bool) err
 			"-j", c.Name}
 		if !Exists(Nat, "PREROUTING", preroute...) && enable {
 			if err := c.Prerouting(Append, preroute...); err != nil {
-				return fmt.Errorf("Failed to inject docker in PREROUTING chain: %s", err)
+				return fmt.Errorf("Failed to inject %s in PREROUTING chain: %s", c.Name, err)
 			}
 		} else if Exists(Nat, "PREROUTING", preroute...) && !enable {
 			if err := c.Prerouting(Delete, preroute...); err != nil {
-				return fmt.Errorf("Failed to remove docker in PREROUTING chain: %s", err)
+				return fmt.Errorf("Failed to remove %s in PREROUTING chain: %s", c.Name, err)
 			}
 		}
 		output := []string{
@@ -158,11 +167,11 @@ func ProgramChain(c *ChainInfo, bridgeName string, hairpinMode, enable bool) err
 		}
 		if !Exists(Nat, "OUTPUT", output...) && enable {
 			if err := c.Output(Append, output...); err != nil {
-				return fmt.Errorf("Failed to inject docker in OUTPUT chain: %s", err)
+				return fmt.Errorf("Failed to inject %s in OUTPUT chain: %s", c.Name, err)
 			}
 		} else if Exists(Nat, "OUTPUT", output...) && !enable {
 			if err := c.Output(Delete, output...); err != nil {
-				return fmt.Errorf("Failed to inject docker in OUTPUT chain: %s", err)
+				return fmt.Errorf("Failed to inject %s in OUTPUT chain: %s", c.Name, err)
 			}
 		}
 	case Filter:
@@ -188,6 +197,26 @@ func ProgramChain(c *ChainInfo, bridgeName string, hairpinMode, enable bool) err
 				return fmt.Errorf("Could not delete linking rule from %s/%s: %s", c.Table, c.Name, output)
 			}
 
+		}
+		establish := []string{
+			"-o", bridgeName,
+			"-m", "conntrack",
+			"--ctstate", "RELATED,ESTABLISHED",
+			"-j", "ACCEPT"}
+		if !Exists(Filter, "FORWARD", establish...) && enable {
+			insert := append([]string{string(Insert), "FORWARD"}, establish...)
+			if output, err := Raw(insert...); err != nil {
+				return err
+			} else if len(output) != 0 {
+				return fmt.Errorf("Could not create establish rule to %s: %s", c.Table, output)
+			}
+		} else if Exists(Filter, "FORWARD", establish...) && !enable {
+			del := append([]string{string(Delete), "FORWARD"}, establish...)
+			if output, err := Raw(del...); err != nil {
+				return err
+			} else if len(output) != 0 {
+				return fmt.Errorf("Could not delete establish rule from %s: %s", c.Table, output)
+			}
 		}
 	}
 	return nil
@@ -247,11 +276,7 @@ func (c *ChainInfo) Forward(action Action, ip net.IP, port int, proto, destAddr 
 		"--dport", strconv.Itoa(destPort),
 		"-j", "MASQUERADE",
 	}
-	if err := ProgramRule(Nat, "POSTROUTING", action, args); err != nil {
-		return err
-	}
-
-	return nil
+	return ProgramRule(Nat, "POSTROUTING", action, args)
 }
 
 // Link adds reciprocal ACCEPT rule for two supplied IP addresses.
@@ -272,10 +297,7 @@ func (c *ChainInfo) Link(action Action, ip1, ip2 net.IP, port int, proto string,
 	// reverse
 	args[7], args[9] = args[9], args[7]
 	args[10] = "--sport"
-	if err := ProgramRule(Filter, c.Name, action, args); err != nil {
-		return err
-	}
-	return nil
+	return ProgramRule(Filter, c.Name, action, args)
 }
 
 // ProgramRule adds the rule specified by args only if the
@@ -353,7 +375,11 @@ func exists(native bool, table Table, chain string, rule ...string) bool {
 		table = Filter
 	}
 
-	initCheck()
+	if err := initCheck(); err != nil {
+		// The exists() signature does not allow us to return an error, but at least
+		// we can skip the (likely invalid) exec invocation.
+		return false
+	}
 
 	if supportsCOpt {
 		// if exit status is 0 then return true, the rule exists
@@ -430,15 +456,15 @@ func RawCombinedOutputNative(args ...string) error {
 
 // ExistChain checks if a chain exists
 func ExistChain(chain string, table Table) bool {
-	if _, err := Raw("-t", string(table), "-L", chain); err == nil {
+	if _, err := Raw("-t", string(table), "-nL", chain); err == nil {
 		return true
 	}
 	return false
 }
 
-// GetVersion reads the iptables version numbers
+// GetVersion reads the iptables version numbers during initialization
 func GetVersion() (major, minor, micro int, err error) {
-	out, err := Raw("--version")
+	out, err := exec.Command(iptablesPath, "--version").CombinedOutput()
 	if err == nil {
 		major, minor, micro = parseVersionNumbers(string(out))
 	}
@@ -464,4 +490,45 @@ func parseVersionNumbers(input string) (major, minor, micro int) {
 // http://ftp.netfilter.org/pub/iptables/changes-iptables-1.4.11.txt
 func supportsCOption(mj, mn, mc int) bool {
 	return mj > 1 || (mj == 1 && (mn > 4 || (mn == 4 && mc >= 11)))
+}
+
+// AddReturnRule adds a return rule for the chain in the filter table
+func AddReturnRule(chain string) error {
+	var (
+		table = Filter
+		args  = []string{"-j", "RETURN"}
+	)
+
+	if Exists(table, chain, args...) {
+		return nil
+	}
+
+	err := RawCombinedOutput(append([]string{"-A", chain}, args...)...)
+	if err != nil {
+		return fmt.Errorf("unable to add return rule in %s chain: %s", chain, err.Error())
+	}
+
+	return nil
+}
+
+// EnsureJumpRule ensures the jump rule is on top
+func EnsureJumpRule(fromChain, toChain string) error {
+	var (
+		table = Filter
+		args  = []string{"-j", toChain}
+	)
+
+	if Exists(table, fromChain, args...) {
+		err := RawCombinedOutput(append([]string{"-D", fromChain}, args...)...)
+		if err != nil {
+			return fmt.Errorf("unable to remove jump to %s rule in %s chain: %s", toChain, fromChain, err.Error())
+		}
+	}
+
+	err := RawCombinedOutput(append([]string{"-I", fromChain}, args...)...)
+	if err != nil {
+		return fmt.Errorf("unable to insert jump to %s rule in %s chain: %s", toChain, fromChain, err.Error())
+	}
+
+	return nil
 }
