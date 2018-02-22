@@ -27,7 +27,19 @@ $ netns --help
 |_| |_|\___|\__|_| |_|___/
 
  Runc hook for setting up default bridge networking.
- Version: v0.1.0
+ Version: v0.3.0
+
+ Netns provides the following commands. Usage format:
+
+    netns [-flag value] [-flag value] command
+
+  Where command is one of:
+
+    createbr, delbr, [ls|list], delete
+
+  If command is blank (e.g. when called via a hook) it
+  will create a network endpoint in the expected net
+  namespace details for that PID.
 
   -bridge string
         name for bridge (default "netns0")
@@ -40,10 +52,11 @@ $ netns --help
         file in which to save the containers ip address (default ".ip")
   -mtu int
         mtu for bridge (default 1500)
+  -state-dir string
+        directory for saving state, used for ip allocation (default "/run/github.com/jessfraz/netns")
   -v    print version and exit (shorthand)
   -version
         print version and exit
-
 ```
 
 Place this in the `Hooks.Prestart` field of your `runc` config.
