@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/jessfraz/netns/version"
+	"github.com/genuinetools/netns/version"
 	"github.com/sirupsen/logrus"
 )
 
@@ -39,7 +39,7 @@ const (
 	defaultPortPrefix         = "netnsv0"
 	defaultBridgeName         = "netns0"
 	defaultMTU                = 1500
-	defaultStateDir           = "/run/github.com/jessfraz/netns"
+	defaultStateDir           = "/run/github.com/genuinetools/netns"
 )
 
 var (

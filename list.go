@@ -9,7 +9,7 @@ import (
 	"text/tabwriter"
 
 	"github.com/boltdb/bolt"
-	"github.com/jessfraz/netns/ipallocator"
+	"github.com/genuinetools/netns/ipallocator"
 	"github.com/vishvananda/netlink"
 	"github.com/vishvananda/netns"
 )

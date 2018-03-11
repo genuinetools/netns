@@ -1,6 +1,6 @@
 # netns
 
-[![Travis CI](https://travis-ci.org/jessfraz/netns.svg?branch=master)](https://travis-ci.org/jessfraz/netns)
+[![Travis CI](https://travis-ci.org/genuinetools/netns.svg?branch=master)](https://travis-ci.org/genuinetools/netns)
 
 Runc hook for setting up default bridge networking.
 
@@ -8,12 +8,12 @@ Runc hook for setting up default bridge networking.
 
 #### Binaries
 
-- **linux** [386](https://github.com/jessfraz/netns/releases/download/v0.3.0/netns-linux-386) / [amd64](https://github.com/jessfraz/netns/releases/download/v0.3.0/netns-linux-amd64) / [arm](https://github.com/jessfraz/netns/releases/download/v0.3.0/netns-linux-arm) / [arm64](https://github.com/jessfraz/netns/releases/download/v0.3.0/netns-linux-arm64)
+- **linux** [386](https://github.com/genuinetools/netns/releases/download/v0.3.0/netns-linux-386) / [amd64](https://github.com/genuinetools/netns/releases/download/v0.3.0/netns-linux-amd64) / [arm](https://github.com/genuinetools/netns/releases/download/v0.3.0/netns-linux-arm) / [arm64](https://github.com/genuinetools/netns/releases/download/v0.3.0/netns-linux-arm64)
 
 #### Via Go
 
 ```bash
-$ go get github.com/jessfraz/netns
+$ go get github.com/genuinetools/netns
 ```
 
 ## Usage
@@ -53,7 +53,7 @@ $ netns --help
   -mtu int
         mtu for bridge (default 1500)
   -state-dir string
-        directory for saving state, used for ip allocation (default "/run/github.com/jessfraz/netns")
+        directory for saving state, used for ip allocation (default "/run/github.com/genuinetools/netns")
   -v    print version and exit (shorthand)
   -version
         print version and exit

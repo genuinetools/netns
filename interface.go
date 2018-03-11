@@ -9,7 +9,7 @@ import (
 	"runtime"
 
 	"github.com/docker/libnetwork/iptables"
-	"github.com/jessfraz/netns/ipallocator"
+	"github.com/genuinetools/netns/ipallocator"
 	"github.com/opencontainers/runc/libcontainer/configs"
 	"github.com/sirupsen/logrus"
 	"github.com/vishvananda/netlink"
