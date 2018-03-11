@@ -7,7 +7,7 @@ ENV GOPATH /go
 RUN	apk add --no-cache \
 	ca-certificates
 
-COPY . /go/src/github.com/jessfraz/netns
+COPY . /go/src/github.com/genuinetools/netns
 
 RUN set -x \
 	&& apk add --no-cache --virtual .build-deps \
@@ -17,7 +17,7 @@ RUN set -x \
 		libgcc \
 		linux-headers \
 		make \
-	&& cd /go/src/github.com/jessfraz/netns \
+	&& cd /go/src/github.com/genuinetools/netns \
 	&& make static \
 	&& mv netns /usr/bin/netns \
 	&& apk del .build-deps \

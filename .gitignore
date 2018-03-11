@@ -44,3 +44,7 @@ Icon
 
 netns
 cross/
+
+# Go coverage results
+coverage.txt
+profile.out
