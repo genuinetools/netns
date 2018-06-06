@@ -113,12 +113,9 @@ func (i *IPAllocator) Allocate(pid int) (ip net.IP, err error) {
 		if _, ok := ipMap[ip.String()]; !ok {
 			// use ICMP to check if the IP is in use, final sanity check.
 			if !ping.Ping(&net.IPAddr{IP: ip, Zone: ""}, 150*time.Millisecond) {
-				ipMap[ip.String()] = struct{}{}
 				break
-			} else if err != nil {
-				// for now just keep cycling
-				// return nil, err
-				logrus.Debugf("[ipallocator]: ping ip %s failed: %v", ip.String(), err)
+			} else {
+				logrus.Debugf("[ipallocator]: ip %s is already allocated", ip.String())
 			}
 		}
 
