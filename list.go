@@ -40,6 +40,11 @@ func listNetworks() error {
 		b := tx.Bucket(ipallocator.IPBucket)
 
 		return b.ForEach(func(k, v []byte) error {
+			// skip last ip
+			if len(k) == 1 && k[0] == 0 {
+				return nil
+			}
+
 			n := network{
 				ip: k,
 			}
