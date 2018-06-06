@@ -86,7 +86,7 @@ func (i *IPAllocator) Allocate(pid int) (ip net.IP, err error) {
 		k, _ := tx.Bucket(IPBucket).Cursor().Last()
 
 		if string(k) != "" {
-			lastip = net.ParseIP(string(k))
+			lastip = k
 		}
 
 		return nil
@@ -127,7 +127,7 @@ func (i *IPAllocator) Allocate(pid int) (ip net.IP, err error) {
 
 	// save the new ip in the database
 	if err := i.db.Update(func(tx *bolt.Tx) error {
-		return tx.Bucket(IPBucket).Put([]byte(ip.String()), []byte(strconv.Itoa(pid)))
+		return tx.Bucket(IPBucket).Put(ip, []byte(strconv.Itoa(pid)))
 	}); err != nil {
 		return nil, fmt.Errorf("Adding ip %s to database for %d failed: %v", ip.String(), pid, err)
 	}

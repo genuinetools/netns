@@ -41,7 +41,7 @@ func listNetworks() error {
 
 		return b.ForEach(func(k, v []byte) error {
 			n := network{
-				ip: net.ParseIP(string(k)),
+				ip: k,
 			}
 
 			// get the pid
