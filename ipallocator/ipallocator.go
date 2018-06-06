@@ -106,7 +106,7 @@ func (i *IPAllocator) Allocate(pid int) (ip net.IP, err error) {
 				return nil, fmt.Errorf("Could not find a suitable IP in network %s", i.IPNet.String())
 			}
 
-			lastip = i.IPNet.IP
+			ip = i.IPNet.IP
 			cycled = true
 		}
 
