@@ -91,48 +91,42 @@ func (i *IPAllocator) Allocate(pid int) (ip net.IP, err error) {
 		return nil, err
 	}
 
-	var cycled bool
+	ip = increaseIp(lastip)
+
 	for {
-		rawip := ipToBigInt(lastip)
-
-		rawip.Add(rawip, big.NewInt(1))
-		ip = bigIntToIP(rawip)
-
-		if !i.IPNet.Contains(ip) {
-			if cycled {
-				return nil, fmt.Errorf("Could not find a suitable IP in network %s", i.IPNet.String())
-			}
-
+		switch {
+		case !i.IPNet.Contains(ip):
 			ip = i.IPNet.IP
-			cycled = true
-		}
 
-		if _, ok := ipMap[ip.String()]; !ok {
+		case !func() bool { _, ok := ipMap[ip.String()]; return ok }():
 			// use ICMP to check if the IP is in use, final sanity check.
 			if !ping.Ping(&net.IPAddr{IP: ip, Zone: ""}, 150*time.Millisecond) {
-				break
+				// save the new ip in the database
+				if err := i.db.Update(func(tx *bolt.Tx) error {
+					if err := tx.Bucket(IPBucket).Put(ip, []byte(strconv.Itoa(pid))); err != nil {
+						return err
+					}
+					if err := tx.Bucket(IPBucket).Put([]byte{0}, ip); err != nil {
+						return err
+					}
+					return nil
+				}); err != nil {
+					return nil, fmt.Errorf("Adding ip %s to database for %d failed: %v", ip.String(), pid, err)
+				}
+				return ip, nil
 			} else {
-				logrus.Debugf("[ipallocator]: ip %s is already allocated", ip.String())
+				logrus.Debugf("[ipallocator] ip %s is already allocated. Skipped.", ip.String())
 			}
 		}
 
-		lastip = ip
+		ip = increaseIp(ip)
+
+		if ip.Equal(increaseIp(lastip)) {
+			break
+		}
 	}
 
-	// save the new ip in the database
-	if err := i.db.Update(func(tx *bolt.Tx) error {
-		if err := tx.Bucket(IPBucket).Put(ip, []byte(strconv.Itoa(pid))); err != nil {
-			return err
-		}
-		if err := tx.Bucket(IPBucket).Put([]byte{0}, ip); err != nil {
-			return err
-		}
-		return nil
-	}); err != nil {
-		return nil, fmt.Errorf("Adding ip %s to database for %d failed: %v", ip.String(), pid, err)
-	}
-
-	return ip, nil
+	return nil, fmt.Errorf("Could not find a suitable IP in network %s", i.IPNet.String())
 }
 
 func (i *IPAllocator) getIPMap() (map[string]struct{}, error) {
@@ -178,4 +172,11 @@ func ipToBigInt(ip net.IP) *big.Int {
 // Converts 128 bit integer into a 4 bytes IP address
 func bigIntToIP(v *big.Int) net.IP {
 	return net.IP(v.Bytes())
+}
+
+// Increases IP address
+func increaseIp(ip net.IP) net.IP {
+	rawip := ipToBigInt(ip)
+	rawip.Add(rawip, big.NewInt(1))
+	return bigIntToIP(rawip)
 }
