@@ -2,6 +2,7 @@ package ipallocator
 
 import (
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"math/big"
 	"net"
@@ -44,15 +45,15 @@ func New(bridgeName, stateDir string, ipNet *net.IPNet) (*IPAllocator, error) {
 	db, err := bolt.Open(dbpath, 0666, nil)
 	if err != nil {
 		if os.IsNotExist(err) {
-			return nil, fmt.Errorf("You have not allocated any IPs")
+			return nil, errors.New("you have not allocated any IPs")
 		}
-		return nil, fmt.Errorf("Opening database at %s failed: %v", dbpath, err)
+		return nil, fmt.Errorf("opening database at %s failed: %v", dbpath, err)
 	}
 
 	// create the ip allocator bucket if it does not exist
 	if err := db.Update(func(tx *bolt.Tx) error {
 		if _, err := tx.CreateBucketIfNotExists(IPBucket); err != nil {
-			return fmt.Errorf("Creating bucket %s failed: %v", IPBucket, err)
+			return fmt.Errorf("creating bucket %s failed: %v", IPBucket, err)
 		}
 		return nil
 	}); err != nil {
@@ -61,7 +62,7 @@ func New(bridgeName, stateDir string, ipNet *net.IPNet) (*IPAllocator, error) {
 
 	br, err := net.InterfaceByName(bridgeName)
 	if err != nil {
-		return nil, fmt.Errorf("Getting bridge interface %s failed: %v", bridgeName, err)
+		return nil, fmt.Errorf("getting bridge interface %s failed: %v", bridgeName, err)
 	}
 
 	ipAllocator := &IPAllocator{
@@ -94,7 +95,7 @@ func (i *IPAllocator) Allocate(pid int) (ip net.IP, err error) {
 
 	bridgeAddrs, _ := i.Bridge.Addrs()
 
-	ip = increaseIp(lastip)
+	ip = increaseIP(lastip)
 
 	for {
 		switch {
@@ -104,8 +105,8 @@ func (i *IPAllocator) Allocate(pid int) (ip net.IP, err error) {
 		// skip bridge ip
 		case func() bool {
 			for _, addr := range bridgeAddrs {
-				itfIp, _, _ := net.ParseCIDR(addr.String())
-				if ip.Equal(itfIp) {
+				itfIP, _, _ := net.ParseCIDR(addr.String())
+				if ip.Equal(itfIP) {
 					return true
 				}
 			}
@@ -114,7 +115,7 @@ func (i *IPAllocator) Allocate(pid int) (ip net.IP, err error) {
 			logrus.Debugf("[ipallocator] ip %s belongs to the bridge. Skipped.", ip.String())
 
 		// Skip broadcast ip
-		case !isUnicastIp(ip, i.IPNet.Mask):
+		case !isUnicastIP(ip, i.IPNet.Mask):
 			logrus.Debugf("[ipallocator] ip %s is not unicast. Skipped.", ip.String())
 
 		case !func() bool { _, ok := ipMap[ip.String()]; return ok }():
@@ -133,15 +134,17 @@ func (i *IPAllocator) Allocate(pid int) (ip net.IP, err error) {
 					return nil, fmt.Errorf("Adding ip %s to database for %d failed: %v", ip.String(), pid, err)
 				}
 				logrus.Debugf("[ipallocator] ip %s is selected.", ip.String())
+
 				return ip, nil
-			} else {
-				logrus.Debugf("[ipallocator] ip %s is already allocated. Skipped.", ip.String())
+
 			}
+
+			logrus.Debugf("[ipallocator] ip %s is already allocated. Skipped.", ip.String())
 		}
 
-		ip = increaseIp(ip)
+		ip = increaseIP(ip)
 
-		if ip.Equal(increaseIp(lastip)) {
+		if ip.Equal(increaseIP(lastip)) {
 			break
 		}
 	}
@@ -195,13 +198,13 @@ func bigIntToIP(v *big.Int) net.IP {
 }
 
 // Increases IP address
-func increaseIp(ip net.IP) net.IP {
+func increaseIP(ip net.IP) net.IP {
 	rawip := ipToBigInt(ip)
 	rawip.Add(rawip, big.NewInt(1))
 	return bigIntToIP(rawip)
 }
 
-func isUnicastIp(ip net.IP, mask net.IPMask) bool {
+func isUnicastIP(ip net.IP, mask net.IPMask) bool {
 	// broadcast v4 ip
 	if len(ip) == net.IPv4len && binary.BigEndian.Uint32(ip)&^binary.BigEndian.Uint32(mask) == ^binary.BigEndian.Uint32(mask) {
 		return false

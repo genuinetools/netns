@@ -1,13 +1,23 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
+	"io/ioutil"
+	"net"
 	"os"
+	"runtime"
 	"strings"
 
+	"github.com/genuinetools/netns/bridge"
+	"github.com/genuinetools/netns/ipallocator"
+	"github.com/genuinetools/netns/netutils"
 	"github.com/genuinetools/netns/version"
+	"github.com/opencontainers/runc/libcontainer/configs"
 	"github.com/sirupsen/logrus"
+	"github.com/vishvananda/netlink"
+	"github.com/vishvananda/netns"
 )
 
 const (
@@ -38,7 +48,6 @@ const (
 	defaultContainerInterface = "eth0"
 	defaultPortPrefix         = "netnsv0"
 	defaultBridgeName         = "netns0"
-	defaultMTU                = 1500
 	defaultStateDir           = "/run/github.com/genuinetools/netns"
 )
 
@@ -61,7 +70,7 @@ func init() {
 	flag.StringVar(&bridgeName, "bridge", defaultBridgeName, "name for bridge")
 	flag.StringVar(&containerInterface, "iface", defaultContainerInterface, "name of interface in the namespace")
 	flag.StringVar(&ipAddr, "ip", "172.19.0.1/16", "ip address for bridge")
-	flag.IntVar(&mtu, "mtu", defaultMTU, "mtu for bridge")
+	flag.IntVar(&mtu, "mtu", bridge.DefaultMTU, "mtu for bridge")
 	flag.StringVar(&stateDir, "state-dir", defaultStateDir, "directory for saving state, used for ip allocation")
 
 	flag.StringVar(&ipfile, "ipfile", ".ip", "file in which to save the containers ip address")
@@ -74,25 +83,23 @@ func init() {
 		fmt.Fprint(os.Stderr, fmt.Sprintf(BANNER, version.VERSION))
 		flag.PrintDefaults()
 	}
-}
 
-func main() {
 	flag.Parse()
 
 	if flag.NArg() == 1 {
 		arg = flag.Args()[0]
 	}
+
 	if flag.NArg() > 1 {
 		ignored := []string{"Ignoring parameters:"}
 		argList := flag.Args()[1:]
 		for i := range argList {
 			ignored = append(ignored, argList[i])
 		}
-		logrus.Error(strings.Join(ignored, " "))
-		usageAndExit("Flags must be placed before command", 1)
+		usageAndExit("Flags must be placed before the command. "+strings.Join(ignored, " "), 1)
 	}
 
-	if arg == "help" {
+	if flag.Args()[0] == "help" {
 		usageAndExit("", 0)
 	}
 
@@ -105,7 +112,9 @@ func main() {
 	if debug {
 		logrus.SetLevel(logrus.DebugLevel)
 	}
+}
 
+func main() {
 	switch arg {
 	case "ls":
 		if err := listNetworks(); err != nil {
@@ -116,15 +125,18 @@ func main() {
 			logrus.Fatal(err)
 		}
 	case "delete":
-		if err := destroyNetwork(); err != nil {
+		if err := bridge.Delete(bridgeName); err != nil {
 			logrus.Fatal(err)
 		}
 	case "createbr":
-		if err := initBridge(); err != nil {
+		if err := bridge.Init(bridgeName, &bridge.Opt{
+			MTU:    mtu,
+			IPAddr: ipAddr,
+		}); err != nil {
 			logrus.Fatal(err)
 		}
 	case "delbr":
-		if err := deleteBridge(); err != nil {
+		if err := bridge.Delete(bridgeName); err != nil {
 			logrus.Fatal(err)
 		}
 	case "":
@@ -144,4 +156,192 @@ func usageAndExit(message string, exitCode int) {
 	flag.Usage()
 	fmt.Fprintf(os.Stderr, "\n")
 	os.Exit(exitCode)
+}
+
+func createNetwork() error {
+	// Get hook data.
+	h, err := readHookData()
+	if err != nil {
+		return err
+	}
+
+	// Initialize the bridge.
+	if err := bridge.Init(bridgeName, &bridge.Opt{
+		MTU:    mtu,
+		IPAddr: ipAddr,
+	}); err != nil {
+		return err
+	}
+
+	// Create and attach local name to the bridge.
+	localVethPair, err := vethPair(h.Pid, bridgeName)
+	if err != nil {
+		return fmt.Errorf("getting vethpair failed for pid %d: %v", h.Pid, err)
+	}
+
+	if err := netlink.LinkAdd(localVethPair); err != nil {
+		return fmt.Errorf("create veth pair named [ %#v ] failed: %v", localVethPair, err)
+	}
+
+	// Get the peer link
+	peer, err := netlink.LinkByName(localVethPair.PeerName)
+	if err != nil {
+		return fmt.Errorf("getting peer interface %s failed: %v", localVethPair.PeerName, err)
+	}
+
+	// Put peer interface into the network namespace of specified PID.
+	if err := netlink.LinkSetNsPid(peer, h.Pid); err != nil {
+		return fmt.Errorf("adding peer interface to network namespace of pid %d failed: %v", h.Pid, err)
+	}
+
+	// Bring the veth pair up.
+	if err := netlink.LinkSetUp(localVethPair); err != nil {
+		return fmt.Errorf("bringing local veth pair [ %#v ] up failed: %v", localVethPair, err)
+	}
+
+	// Check the bridge IPNet as it may be different than the default.
+	brNet, err := netutils.GetInterfaceAddr(bridgeName)
+	if err != nil {
+		return fmt.Errorf("retrieving IP/network of bridge %s failed: %v", bridgeName, err)
+	}
+
+	// Allocate an ip address for the interface.
+	ip, ipNet, err := net.ParseCIDR(brNet.String())
+	if err != nil {
+		return fmt.Errorf("parsing CIDR for %s failed: %v", ipAddr, err)
+	}
+
+	ipAllocator, err := ipallocator.New(bridgeName, stateDir, ipNet)
+	if err != nil {
+		return err
+	}
+	nsip, err := ipAllocator.Allocate(h.Pid)
+	if err != nil {
+		return fmt.Errorf("Allocating ip address failed: %v", err)
+	}
+
+	newIP := &net.IPNet{
+		IP:   nsip,
+		Mask: ipNet.Mask,
+	}
+
+	// Configure the interface in the network namespace.
+	if err := configureInterface(localVethPair.PeerName, h.Pid, newIP, ip.String()); err != nil {
+		return err
+	}
+
+	logrus.Infof("Attached veth (%s) to bridge (%s)", localVethPair.Name, bridgeName)
+
+	// save the ip to a file so other hooks can use it.
+	if err := ioutil.WriteFile(ipfile, []byte(nsip.String()), 0755); err != nil {
+		return fmt.Errorf("Saving allocated ip address for container to %s failed: %v", ipfile, err)
+	}
+
+	return nil
+}
+
+// configureInterface configures the network interface in the network namespace.
+func configureInterface(name string, pid int, addr *net.IPNet, gatewayIP string) error {
+	// Lock the OS Thread so we don't accidentally switch namespaces
+	runtime.LockOSThread()
+	defer runtime.UnlockOSThread()
+
+	// Save the current network namespace
+	origns, err := netns.Get()
+	if err != nil {
+		return fmt.Errorf("Getting current network namespace failed: %v", err)
+	}
+	defer origns.Close()
+
+	// Get the namespace
+	newns, err := netns.GetFromPid(pid)
+	if err != nil {
+		return fmt.Errorf("Getting network namespace for pid %d failed: %v", pid, err)
+	}
+	defer newns.Close()
+
+	// Enter the namespace
+	if err := netns.Set(newns); err != nil {
+		return fmt.Errorf("Entering network namespace failed: %v", err)
+	}
+
+	// Find the network interface identified by the name
+	iface, err := netlink.LinkByName(name)
+	if err != nil {
+		return fmt.Errorf("Getting link by name %s failed: %v", name, err)
+	}
+
+	// Bring the interface down
+	if err := netlink.LinkSetDown(iface); err != nil {
+		return fmt.Errorf("Bringing interface [ %#v ] down failed: %v", iface, err)
+	}
+
+	// Change the interface name to eth0 in the namespace
+	if err := netlink.LinkSetName(iface, containerInterface); err != nil {
+		return fmt.Errorf("Renaming interface %s to %s failed: %v", name, defaultContainerInterface, err)
+	}
+
+	// Add the IP address
+	ipAddr := &netlink.Addr{IPNet: addr, Label: ""}
+	if err := netlink.AddrAdd(iface, ipAddr); err != nil {
+		return fmt.Errorf("Setting interface %s ip to %s failed: %v", name, addr.String(), err)
+	}
+
+	// Bring the interface up
+	if err := netlink.LinkSetUp(iface); err != nil {
+		return fmt.Errorf("Bringing interface [ %#v ] up failed: %v", iface, err)
+	}
+
+	// Add the gateway route
+	gw := net.ParseIP(gatewayIP)
+	err = netlink.RouteAdd(&netlink.Route{
+		Scope:     netlink.SCOPE_UNIVERSE,
+		LinkIndex: iface.Attrs().Index,
+		Gw:        gw,
+	})
+	if err != nil {
+		return fmt.Errorf("Adding route %s to interface %s failed: %v", gw.String(), name, err)
+	}
+
+	// Switch back to the original namespace
+	if err := netns.Set(origns); err != nil {
+		return fmt.Errorf("Switching back to original namespace failed: %v", err)
+	}
+
+	return nil
+}
+
+// readHookData decodes stdin as HookState
+func readHookData() (hook configs.HookState, err error) {
+	// Read hook data from stdin
+	b, err := ioutil.ReadAll(os.Stdin)
+	if err != nil {
+		return hook, fmt.Errorf("Reading hook data from stdin failed: %v", err)
+	}
+
+	// Umarshal the hook state
+	if err := json.Unmarshal(b, &hook); err != nil {
+		return hook, fmt.Errorf("Unmarshal stdin as HookState failed: %v", err)
+	}
+
+	logrus.Debugf("Hooks State: %#v", hook)
+	return hook, nil
+
+}
+
+// vethPair creates a veth pair. Peername is renamed to eth0 in the container.
+func vethPair(pid int, bridgeName string) (*netlink.Veth, error) {
+	br, err := netlink.LinkByName(bridgeName)
+	if err != nil {
+		return nil, err
+	}
+
+	la := netlink.NewLinkAttrs()
+	la.Name = fmt.Sprintf("%s-%d", defaultPortPrefix, pid)
+	la.MasterIndex = br.Attrs().Index
+
+	return &netlink.Veth{
+		LinkAttrs: la,
+		PeerName:  fmt.Sprintf("ethc%d", pid),
+	}, nil
 }
