@@ -1,6 +1,6 @@
 ---
   language: go
-  sudo: false
+  sudo: true
   notifications:
     email: true
   go:
