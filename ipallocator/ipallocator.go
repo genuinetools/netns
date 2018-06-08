@@ -1,6 +1,7 @@
 package ipallocator
 
 import (
+	"encoding/binary"
 	"fmt"
 	"math/big"
 	"net"
@@ -83,56 +84,69 @@ func (i *IPAllocator) Allocate(pid int) (ip net.IP, err error) {
 	// find the last IP used by the allocator
 	lastip := i.IPNet.IP
 	if err := i.db.View(func(tx *bolt.Tx) error {
-		k, _ := tx.Bucket(IPBucket).Cursor().Last()
-
-		if string(k) != "" {
-			lastip = net.ParseIP(string(k))
+		if result := tx.Bucket(IPBucket).Get([]byte{0}); result != nil {
+			lastip = result
 		}
-
 		return nil
 	}); err != nil {
 		return nil, err
 	}
 
-	var cycled bool
+	bridgeAddrs, _ := i.Bridge.Addrs()
+
+	ip = increaseIp(lastip)
+
 	for {
-		rawip := ipToBigInt(lastip)
+		switch {
+		case !i.IPNet.Contains(ip):
+			ip = i.IPNet.IP
 
-		rawip.Add(rawip, big.NewInt(1))
-		ip = bigIntToIP(rawip)
-
-		if !i.IPNet.Contains(ip) {
-			if cycled {
-				return nil, fmt.Errorf("Could not find a suitable IP in network %s", i.IPNet.String())
+		// skip bridge ip
+		case func() bool {
+			for _, addr := range bridgeAddrs {
+				itfIp, _, _ := net.ParseCIDR(addr.String())
+				if ip.Equal(itfIp) {
+					return true
+				}
 			}
+			return false
+		}():
+			logrus.Debugf("[ipallocator] ip %s belongs to the bridge. Skipped.", ip.String())
 
-			lastip = i.IPNet.IP
-			cycled = true
-		}
+		// Skip broadcast ip
+		case !isUnicastIp(ip, i.IPNet.Mask):
+			logrus.Debugf("[ipallocator] ip %s is not unicast. Skipped.", ip.String())
 
-		if _, ok := ipMap[ip.String()]; !ok {
+		case !func() bool { _, ok := ipMap[ip.String()]; return ok }():
 			// use ICMP to check if the IP is in use, final sanity check.
 			if !ping.Ping(&net.IPAddr{IP: ip, Zone: ""}, 150*time.Millisecond) {
-				ipMap[ip.String()] = struct{}{}
-				break
-			} else if err != nil {
-				// for now just keep cycling
-				// return nil, err
-				logrus.Debugf("[ipallocator]: ping ip %s failed: %v", ip.String(), err)
+				// save the new ip in the database
+				if err := i.db.Update(func(tx *bolt.Tx) error {
+					if err := tx.Bucket(IPBucket).Put(ip, []byte(strconv.Itoa(pid))); err != nil {
+						return err
+					}
+					if err := tx.Bucket(IPBucket).Put([]byte{0}, ip); err != nil {
+						return err
+					}
+					return nil
+				}); err != nil {
+					return nil, fmt.Errorf("Adding ip %s to database for %d failed: %v", ip.String(), pid, err)
+				}
+				logrus.Debugf("[ipallocator] ip %s is selected.", ip.String())
+				return ip, nil
+			} else {
+				logrus.Debugf("[ipallocator] ip %s is already allocated. Skipped.", ip.String())
 			}
 		}
 
-		lastip = ip
+		ip = increaseIp(ip)
+
+		if ip.Equal(increaseIp(lastip)) {
+			break
+		}
 	}
 
-	// save the new ip in the database
-	if err := i.db.Update(func(tx *bolt.Tx) error {
-		return tx.Bucket(IPBucket).Put([]byte(ip.String()), []byte(strconv.Itoa(pid)))
-	}); err != nil {
-		return nil, fmt.Errorf("Adding ip %s to database for %d failed: %v", ip.String(), pid, err)
-	}
-
-	return ip, nil
+	return nil, fmt.Errorf("Could not find a suitable IP in network %s", i.IPNet.String())
 }
 
 func (i *IPAllocator) getIPMap() (map[string]struct{}, error) {
@@ -178,4 +192,21 @@ func ipToBigInt(ip net.IP) *big.Int {
 // Converts 128 bit integer into a 4 bytes IP address
 func bigIntToIP(v *big.Int) net.IP {
 	return net.IP(v.Bytes())
+}
+
+// Increases IP address
+func increaseIp(ip net.IP) net.IP {
+	rawip := ipToBigInt(ip)
+	rawip.Add(rawip, big.NewInt(1))
+	return bigIntToIP(rawip)
+}
+
+func isUnicastIp(ip net.IP, mask net.IPMask) bool {
+	// broadcast v4 ip
+	if len(ip) == net.IPv4len && binary.BigEndian.Uint32(ip)&^binary.BigEndian.Uint32(mask) == ^binary.BigEndian.Uint32(mask) {
+		return false
+	}
+
+	// global unicast
+	return ip.IsGlobalUnicast()
 }
