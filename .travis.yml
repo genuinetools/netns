@@ -14,8 +14,8 @@
     - go get github.com/golang/lint/golint
     - go get honnef.co/go/tools/cmd/staticcheck
   script:
-    - make all
-    - make cover
+    - make all GO=$(which go)
+    - make cover GO=$(which go)
     - make release
   after_success:
     - bash <(curl -s https://codecov.io/bash)
