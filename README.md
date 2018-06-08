@@ -8,7 +8,7 @@ Runc hook for setting up default bridge networking.
 
 #### Binaries
 
-- **linux** [386](https://github.com/genuinetools/netns/releases/download/v0.4.0/netns-linux-386) / [amd64](https://github.com/genuinetools/netns/releases/download/v0.4.0/netns-linux-amd64) / [arm](https://github.com/genuinetools/netns/releases/download/v0.4.0/netns-linux-arm) / [arm64](https://github.com/genuinetools/netns/releases/download/v0.4.0/netns-linux-arm64)
+- **linux** [386](https://github.com/genuinetools/netns/releases/download/v0.4.1/netns-linux-386) / [amd64](https://github.com/genuinetools/netns/releases/download/v0.4.1/netns-linux-amd64) / [arm](https://github.com/genuinetools/netns/releases/download/v0.4.1/netns-linux-arm) / [arm64](https://github.com/genuinetools/netns/releases/download/v0.4.1/netns-linux-arm64)
 
 #### Via Go
 
@@ -27,7 +27,7 @@ $ netns --help
 |_| |_|\___|\__|_| |_|___/
 
  Runc hook for setting up default bridge networking.
- Version: v0.4.0
+ Version: v0.4.1
 
  Netns provides the following commands. Usage format:
 
