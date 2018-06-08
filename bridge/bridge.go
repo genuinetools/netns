@@ -17,9 +17,6 @@ const (
 )
 
 var (
-	// ipBucket is the bolt database bucket for ip key value store.
-	ipBucket = []byte("ipallocator")
-
 	// ErrIPAddrEmpty holds the error for when the ip address is empty.
 	ErrIPAddrEmpty = errors.New("ip address cannot be empty")
 	// ErrNameEmpty holds the error for when the name is empty.

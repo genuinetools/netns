@@ -21,6 +21,7 @@ func (c *Client) Create(hook configs.HookState, brOpt bridge.Opt) (net.IP, error
 	if err := c.openDB(false); err != nil {
 		return nil, err
 	}
+	defer c.closeDB()
 
 	// Initialize the bridge.
 	var err error

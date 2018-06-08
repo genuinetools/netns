@@ -43,6 +43,10 @@ func TestCreateNetwork(t *testing.T) {
 		t.Fatalf("expected IP to be %s got %s", expected, ip.String())
 	}
 
+	if err := c.openDB(false); err != nil {
+		t.Fatal(err)
+	}
+
 	process2, err := createTestProcess()
 	if err != nil {
 		t.Fatal(err)
