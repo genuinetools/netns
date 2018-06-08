@@ -11,7 +11,7 @@
   branch = "master"
   name = "github.com/docker/libnetwork"
   packages = ["iptables"]
-  revision = "d5818e7204d3886a246f3ea4ce39fb133067b194"
+  revision = "3931ba4d815e385ab97093c64477b82f14dadefb"
 
 [[projects]]
   branch = "master"
@@ -29,7 +29,7 @@
   branch = "master"
   name = "github.com/opencontainers/runc"
   packages = ["libcontainer/configs"]
-  revision = "0cbfd8392fff2462701507296081e835b3b0b99a"
+  revision = "dd56ece8236d6d9e5bed4ea0c31fe53c7b873ff4"
 
 [[projects]]
   name = "github.com/opencontainers/runtime-spec"
@@ -62,7 +62,7 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "2d027ae1dddd4694d54f7a8b6cbe78dca8720226"
+  revision = "8ac0e0d97ce45cd83d1d7243c060cb8461dda5e9"
 
 [[projects]]
   branch = "master"
@@ -71,7 +71,7 @@
     "unix",
     "windows"
   ]
-  revision = "d0faeb539838e250bd0a9db4182d48d4a1915181"
+  revision = "9527bec2660bd847c050fda93a0f0c6dee0800bb"
 
 [solve-meta]
   analyzer-name = "dep"

@@ -5,11 +5,11 @@ import (
 	"net"
 	"runtime"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/boltdb/bolt"
 	"github.com/genuinetools/netns/bridge"
 	"github.com/genuinetools/netns/netutils"
 	"github.com/opencontainers/runc/libcontainer/configs"
+	"github.com/sirupsen/logrus"
 	"github.com/vishvananda/netlink"
 	"github.com/vishvananda/netns"
 )

@@ -8,9 +8,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/Sirupsen/logrus"
 	"github.com/boltdb/bolt"
 	"github.com/erikh/ping"
+	"github.com/sirupsen/logrus"
 	"github.com/vishvananda/netlink"
 )
 
