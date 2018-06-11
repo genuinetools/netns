@@ -92,7 +92,7 @@ func init() {
 		usageAndExit("Flags must be placed before the command. "+strings.Join(ignored, " "), 1)
 	}
 
-	if flag.Args()[0] == "help" {
+	if len(flag.Args()) > 0 && flag.Args()[0] == "help" {
 		usageAndExit("", 0)
 	}
 
