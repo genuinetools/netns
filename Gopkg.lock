@@ -2,80 +2,110 @@
 
 
 [[projects]]
+  digest = "1:81510c25c0bc187a71dce36ba9935770425f58bc6bbd1cff105d93c9eb37cfe7"
   name = "github.com/boltdb/bolt"
   packages = ["."]
+  pruneopts = "NU"
   revision = "2f1ce7a837dcb8da3ec595b1dac9d0632f0f99e8"
   version = "v1.3.1"
 
 [[projects]]
   branch = "master"
+  digest = "1:6236bee68792490058de1309793d0b6f1d3bb425396d24ef9fc0ae3c46029d36"
   name = "github.com/docker/libnetwork"
   packages = ["iptables"]
-  revision = "3931ba4d815e385ab97093c64477b82f14dadefb"
+  pruneopts = "NU"
+  revision = "0d7e26e19043113ac982fd79fff4ca420b671b59"
 
 [[projects]]
   branch = "master"
+  digest = "1:15e804c8b8cdf214978e353547a5e57fa16ac4ad15811809c7cc72d2c9b9d3e9"
   name = "github.com/erikh/ping"
   packages = ["."]
+  pruneopts = "NU"
   revision = "d731d249e12a103e22d5d4cdf41bf37062623ea4"
 
 [[projects]]
+  digest = "1:7051d8f4de69515238792860b628287f045f4ab6bca08f8671b56abaf47334a3"
   name = "github.com/godbus/dbus"
   packages = ["."]
+  pruneopts = "NU"
   revision = "a389bdde4dd695d414e47b755e95e72b7826432c"
   version = "v4.1.0"
 
 [[projects]]
   branch = "master"
+  digest = "1:4ab313a2c78954903d7f8e074e6be69a9c2007cd416d39506cc44810f95102a3"
   name = "github.com/opencontainers/runc"
   packages = ["libcontainer/configs"]
-  revision = "dd56ece8236d6d9e5bed4ea0c31fe53c7b873ff4"
+  pruneopts = "NU"
+  revision = "21ac0862f2c695f7ecb55346401932a9ad8cc8d6"
 
 [[projects]]
+  digest = "1:57234a321bf1f8f98a8a9a5122a2404cc60d0800516f4ab7a7b2375e4b2d19ea"
   name = "github.com/opencontainers/runtime-spec"
   packages = ["specs-go"]
+  pruneopts = "NU"
   revision = "4e3b9264a330d094b0386c3703c5f379119711e8"
   version = "v1.0.1"
 
 [[projects]]
+  digest = "1:fb851541f5df335edb55ae691842a09ba4397bbf2deec9f7c5ad4a49de3fa44d"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
+  pruneopts = "NU"
   revision = "c155da19408a8799da419ed3eeb0cb5db0ad5dbc"
   version = "v1.0.5"
 
 [[projects]]
+  digest = "1:43f9e3db8ac740f7e83fce0550a049fe0b1225123523d02096ddd60b6bab6c4c"
   name = "github.com/vishvananda/netlink"
   packages = [
     ".",
-    "nl"
+    "nl",
   ]
+  pruneopts = "NU"
   revision = "a2ad57a690f3caf3015351d2d6e1c0b95c349752"
   version = "v1.0.0"
 
 [[projects]]
   branch = "master"
+  digest = "1:e807c8618d297d5ce94d69f21c62d64ab59494584bccfd53fa6c247aeb8cfcd4"
   name = "github.com/vishvananda/netns"
   packages = ["."]
+  pruneopts = "NU"
   revision = "be1fbeda19366dea804f00efff2dd73a1642fdcc"
 
 [[projects]]
   branch = "master"
+  digest = "1:ed359abd610d03004c519d6269e99c31d33bb218ba4f889985d30a5ada76d4df"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "8ac0e0d97ce45cd83d1d7243c060cb8461dda5e9"
+  pruneopts = "NU"
+  revision = "a49355c7e3f8fe157a85be2f77e6e269a0f89602"
 
 [[projects]]
   branch = "master"
+  digest = "1:f18a84ee7d48acb0a402e5ae19df6c7df4d6d6db09593f60cd29d2b6e8c1cee4"
   name = "golang.org/x/sys"
   packages = [
     "unix",
-    "windows"
+    "windows",
   ]
-  revision = "9527bec2660bd847c050fda93a0f0c6dee0800bb"
+  pruneopts = "NU"
+  revision = "1b2967e3c290b7c545b3db0deeda16e9be4f98a2"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "9595f1fa82d14cae3738fec05fd46ca8a2493a3868bb0738e09c49e35f980cb5"
+  input-imports = [
+    "github.com/boltdb/bolt",
+    "github.com/docker/libnetwork/iptables",
+    "github.com/erikh/ping",
+    "github.com/opencontainers/runc/libcontainer/configs",
+    "github.com/sirupsen/logrus",
+    "github.com/vishvananda/netlink",
+    "github.com/vishvananda/netns",
+  ]
   solver-name = "gps-cdcl"
   solver-version = 1
