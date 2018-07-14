@@ -7,13 +7,13 @@ before_install:
   - go get honnef.co/go/tools/cmd/staticcheck
 jobs:
   include:
-    - script: make all
+    - script: make all GO=$(which go)
     - stage: Run Test Coverage
-      script: make cover
+      script: make cover GO=$(which go)
       after_success: bash <(curl -s https://codecov.io/bash)
     - stage: Build Release
       script:
-        - make release
+        - make release GO=$(which go)
         - echo "Deploying to GitHub releases ..."
       deploy:
         provider: releases
