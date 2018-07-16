@@ -6,17 +6,20 @@
 
 Runc hook for setting up default bridge networking.
 
+ * [Installation](README.md#installation)
+      * [Binaries](README.md#binaries)
+      * [Via Go](README.md#via-go)
+ * [Usage](README.md#usage)
+
 ## Installation
 
 #### Binaries
 
 For installation instructions from binaries please visit the [Releases Page](https://github.com/genuinetools/netns/releases).
 
-- **linux** [386](https://github.com/genuinetools/netns/releases/download/v0.4.4/netns-linux-386) / [amd64](https://github.com/genuinetools/netns/releases/download/v0.4.4/netns-linux-amd64) / [arm](https://github.com/genuinetools/netns/releases/download/v0.4.4/netns-linux-arm) / [arm64](https://github.com/genuinetools/netns/releases/download/v0.4.4/netns-linux-arm64)
-
 #### Via Go
 
-```bash
+```console
 $ go get github.com/genuinetools/netns
 ```
 
