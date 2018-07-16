@@ -1,6 +1,7 @@
 package network
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -12,6 +13,9 @@ import (
 // List returns the ip addresses being used from the database for the networks
 // with the specified bridge name.
 func (c *Client) List() ([]Network, error) {
+	if c.db == nil {
+		return nil, errors.New("no networks found")
+	}
 	// Open the database.
 	if err := c.openDB(true); err != nil {
 		return nil, err

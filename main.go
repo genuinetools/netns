@@ -1,17 +1,17 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"io/ioutil"
 	"os"
-	"strings"
-	"text/tabwriter"
 
 	"github.com/genuinetools/netns/bridge"
 	"github.com/genuinetools/netns/network"
 	"github.com/genuinetools/netns/version"
+	"github.com/genuinetools/pkg/cli"
 	"github.com/opencontainers/runc/libcontainer/configs"
 	"github.com/sirupsen/logrus"
 )
@@ -54,135 +54,76 @@ var (
 	brOpt  bridge.Opt
 
 	debug bool
-	vrsn  bool
+
+	client *network.Client
 )
 
-func init() {
-	// Parse flags
-	flag.StringVar(&ipfile, "ipfile", ".ip", "file in which to save the containers ip address")
-
-	flag.StringVar(&netOpt.ContainerInterface, "iface", network.DefaultContainerInterface, "name of interface in the namespace")
-	flag.StringVar(&netOpt.StateDir, "state-dir", defaultStateDir, "directory for saving state, used for ip allocation")
-
-	flag.StringVar(&brOpt.Name, "bridge", defaultBridgeName, "name for bridge")
-	flag.StringVar(&brOpt.IPAddr, "ip", defaultBridgeIP, "ip address for bridge")
-	flag.IntVar(&brOpt.MTU, "mtu", bridge.DefaultMTU, "mtu for bridge")
-
-	flag.BoolVar(&vrsn, "version", false, "print version and exit")
-	flag.BoolVar(&vrsn, "v", false, "print version and exit (shorthand)")
-	flag.BoolVar(&debug, "d", false, "run in debug mode")
-
-	flag.Usage = func() {
-		fmt.Fprint(os.Stderr, fmt.Sprintf(BANNER, version.VERSION))
-		flag.PrintDefaults()
-	}
-
-	flag.Parse()
-
-	if flag.NArg() == 1 {
-		arg = flag.Args()[0]
-	}
-
-	if flag.NArg() > 1 {
-		ignored := []string{"Ignoring parameters:"}
-		argList := flag.Args()[1:]
-		for i := range argList {
-			ignored = append(ignored, argList[i])
-		}
-		usageAndExit("Flags must be placed before the command. "+strings.Join(ignored, " "), 1)
-	}
-
-	if len(flag.Args()) > 0 && flag.Args()[0] == "help" {
-		usageAndExit("", 0)
-	}
-
-	if vrsn || arg == "version" {
-		fmt.Printf("netns version %s, build %s", version.VERSION, version.GITCOMMIT)
-		os.Exit(0)
-	}
-
-	// Set log level
-	if debug {
-		logrus.SetLevel(logrus.DebugLevel)
-	}
-
-	netOpt.BridgeName = brOpt.Name
-}
-
 func main() {
-	// Create the network client.
-	client, err := network.New(netOpt)
-	if err != nil {
-		logrus.Fatal(err)
+	// Create a new cli program.
+	p := cli.NewProgram()
+	p.Name = "netns"
+	p.Description = "Runc hook for setting up default bridge networking"
+	// Set the GitCommit and Version.
+	p.GitCommit = version.GITCOMMIT
+	p.Version = version.VERSION
+
+	// Build the list of available commands.
+	p.Commands = []cli.Command{
+		&createCommand{},
+		&listCommand{},
+		&removeCommand{},
 	}
 
-	switch arg {
-	case "ls":
-		networks, err := client.List()
-		if err != nil {
-			logrus.Fatal(err)
+	// Setup the global flags.
+	p.FlagSet = flag.NewFlagSet("global", flag.ExitOnError)
+	p.FlagSet.StringVar(&ipfile, "ipfile", ".ip", "file in which to save the containers ip address")
+
+	p.FlagSet.StringVar(&netOpt.ContainerInterface, "iface", network.DefaultContainerInterface, "name of interface in the namespace")
+	p.FlagSet.StringVar(&netOpt.StateDir, "state-dir", defaultStateDir, "directory for saving state, used for ip allocation")
+
+	p.FlagSet.StringVar(&brOpt.Name, "bridge", defaultBridgeName, "name for bridge")
+	p.FlagSet.StringVar(&brOpt.IPAddr, "ip", defaultBridgeIP, "ip address for bridge")
+	p.FlagSet.IntVar(&brOpt.MTU, "mtu", bridge.DefaultMTU, "mtu for bridge")
+
+	p.FlagSet.BoolVar(&debug, "d", false, "enable debug logging")
+
+	// Set the before function.
+	p.Before = func(ctx context.Context) error {
+		// Set the log level.
+		if debug {
+			logrus.SetLevel(logrus.DebugLevel)
 		}
 
-		// Print the networks.
-		w := tabwriter.NewWriter(os.Stdout, 20, 1, 3, ' ', 0)
-		fmt.Fprint(w, "IP\tLOCAL VETH\tPID\tSTATUS\tNS FD\n")
-		for _, n := range networks {
-			fmt.Fprintf(w, "%s\t%s\t%d\t%s\t%d\n", n.IP.String(), n.VethPair.Attrs().Name, n.PID, n.Status, n.FD)
-		}
-		w.Flush()
-	case "list":
-		networks, err := client.List()
-		if err != nil {
-			logrus.Fatal(err)
-		}
+		netOpt.BridgeName = brOpt.Name
 
-		// Print the networks.
-		w := tabwriter.NewWriter(os.Stdout, 20, 1, 3, ' ', 0)
-		fmt.Fprint(w, "IP\tLOCAL VETH\tPID\tSTATUS\tNS FD\n")
-		for _, n := range networks {
-			fmt.Fprintf(w, "%s\t%s\t%d\t%s\t%d\n", n.IP.String(), n.VethPair.Attrs().Name, n.PID, n.Status, n.FD)
-		}
-		w.Flush()
-	case "delete":
-		if err := bridge.Delete(brOpt.Name); err != nil {
-			logrus.Fatal(err)
-		}
-	case "createbr":
-		if _, err := bridge.Init(brOpt); err != nil {
-			logrus.Fatal(err)
-		}
-	case "delbr":
-		if err := bridge.Delete(brOpt.Name); err != nil {
-			logrus.Fatal(err)
-		}
-	case "":
+		// Create the network client.
+		var err error
+		client, err = network.New(netOpt)
+		return err
+	}
+
+	// Set the main program action.
+	p.Action = func(ctx context.Context, args []string) error {
 		hook, err := readHookData()
 		if err != nil {
-			logrus.Fatal(err)
+			return err
 		}
 
 		ip, err := client.Create(hook, brOpt)
 		if err != nil {
-			logrus.Fatal(err)
+			return err
 		}
 
 		// Save the ip to a file so other hooks can use it.
 		if err := ioutil.WriteFile(ipfile, []byte(ip.String()), 0755); err != nil {
-			logrus.Fatalf("saving allocated ip address for container to %s failed: %v", ipfile, err)
+			return fmt.Errorf("saving allocated ip address for container to %s failed: %v", ipfile, err)
 		}
-	default:
-		logrus.Fatalf("unknown command %s", arg)
-	}
-}
 
-func usageAndExit(message string, exitCode int) {
-	if message != "" {
-		fmt.Fprintf(os.Stderr, message)
-		fmt.Fprintf(os.Stderr, "\n\n")
+		return nil
 	}
-	flag.Usage()
-	fmt.Fprintf(os.Stderr, "\n")
-	os.Exit(exitCode)
+
+	// Run our program.
+	p.Run()
 }
 
 // readHookData decodes stdin as HookState.

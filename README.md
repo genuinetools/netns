@@ -26,44 +26,27 @@ $ go get github.com/genuinetools/netns
 ## Usage
 
 ```console
-$ netns --help
-            _
- _ __   ___| |_ _ __  ___
-| '_ \ / _ \ __| '_ \/ __|
-| | | |  __/ |_| | | \__ \
-|_| |_|\___|\__|_| |_|___/
+$ netns -h
+netns -  Runc hook for setting up default bridge networking.
 
- Runc hook for setting up default bridge networking.
- Version: v0.4.4
+Usage: netns <command>
 
- Netns provides the following commands. Usage format:
+Flags:
 
-    netns [-flag value] [-flag value] command
+  --ipfile     file in which to save the containers ip address (default: .ip)
+  --mtu        mtu for bridge (default: 1500)
+  --state-dir  directory for saving state, used for ip allocation (default: /run/github.com/genuinetools/netns)
+  --bridge     name for bridge (default: netns0)
+  -d           enable debug logging (default: false)
+  --iface      name of interface in the namespace (default: eth0)
+  --ip         ip address for bridge (default: 172.19.0.1/16)
 
-  Where command is one of:
+Commands:
 
-    createbr, delbr, [ls|list], delete
-
-  If command is blank (e.g. when called via a hook) it
-  will create a network endpoint in the expected net
-  namespace details for that PID.
-
-  -bridge string
-        name for bridge (default "netns0")
-  -d    run in debug mode
-  -iface string
-        name of interface in the namespace (default "eth0")
-  -ip string
-        ip address for bridge (default "172.19.0.1/16")
-  -ipfile string
-        file in which to save the containers ip address (default ".ip")
-  -mtu int
-        mtu for bridge (default 1500)
-  -state-dir string
-        directory for saving state, used for ip allocation (default "/run/github.com/genuinetools/netns")
-  -v    print version and exit (shorthand)
-  -version
-        print version and exit
+  create   Create a network.
+  ls       List networks.
+  rm       Delete a network.
+  version  Show the version information.
 ```
 
 Place this in the `Hooks.Prestart` field of your `runc` config.
@@ -92,4 +75,3 @@ IP                  LOCAL VETH          PID                 STATUS
 172.19.0.5          netnsv0-22094       22094               running
 172.19.0.6          netnsv0-25996       25996               running
 ```
-
