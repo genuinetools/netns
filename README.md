@@ -1,12 +1,16 @@
 # netns
 
-[![Travis CI](https://travis-ci.org/genuinetools/netns.svg?branch=master)](https://travis-ci.org/genuinetools/netns)
+[![Travis CI](https://img.shields.io/travis/genuinetools/netns.svg?style=for-the-badge)](https://travis-ci.org/genuinetools/netns)
+[![GoDoc](https://img.shields.io/badge/godoc-reference-5272B4.svg?style=for-the-badge)](https://godoc.org/github.com/genuinetools/netns)
+[![Github All Releases](https://img.shields.io/github/downloads/genuinetools/netns/total.svg?style=for-the-badge)](https://github.com/genuinetools/netns/releases)
 
 Runc hook for setting up default bridge networking.
 
 ## Installation
 
 #### Binaries
+
+For installation instructions from binaries please visit the [Releases Page](https://github.com/genuinetools/netns/releases).
 
 - **linux** [386](https://github.com/genuinetools/netns/releases/download/v0.4.4/netns-linux-386) / [amd64](https://github.com/genuinetools/netns/releases/download/v0.4.4/netns-linux-amd64) / [arm](https://github.com/genuinetools/netns/releases/download/v0.4.4/netns-linux-arm) / [arm64](https://github.com/genuinetools/netns/releases/download/v0.4.4/netns-linux-arm64)
 

@@ -18,20 +18,20 @@ jobs:
       deploy:
         provider: releases
         file:
-          - cross/netns-linux-amd64.md5
           - cross/netns-linux-arm
-          - cross/netns-linux-arm64.sha256
-          - cross/netns-linux-arm.sha256
-          - cross/netns-linux-386.sha256
-          - cross/netns-linux-arm64.md5
-          - cross/netns-linux-arm64
-          - cross/netns-linux-amd64.sha256
-          - cross/netns-linux-386.md5
           - cross/netns-linux-arm.md5
-          - cross/netns-linux-386
+          - cross/netns-linux-arm.sha256
+          - cross/netns-linux-arm64
+          - cross/netns-linux-arm64.md5
+          - cross/netns-linux-arm64.sha256
           - cross/netns-linux-amd64
+          - cross/netns-linux-amd64.md5
+          - cross/netns-linux-amd64.sha256
+          - cross/netns-linux-386
+          - cross/netns-linux-386.md5
+          - cross/netns-linux-386.sha256
         skip_cleanup: true
         on:
           tags: true
         api_key:
-           secure: "gIBEnbcr88sK0rB1jJvc9PdqSCGwsEYsw2J74zAUb6y+2e/wRgGdA7LIYSaFhSrjqO7TSmvIZ6KnZqnypMZ8gEoXvngD5o9/n7FSP4SJpCq0q7nPafm/wI9S8Uk9RgZghHZdR4W/UzZnK/Q1MZ4n7lK2t64xn8xRROpuEpNlrJtizQnW3a4taISDnDiQvvtHqivpR6OmFZCBL4U21VIQ6rQoJZDX8FzIjqYJ/2H0DtZWoQ9JkTmzlrf60B0pVPHdZfsv7St0Qxj5KdTMRg7sFOUnWechM770y8C+kC8tsTlf5t1QSdT0QQJkX+iKD2VbKyhHs49LxIaPa3Gf0jBE/BHe04gtcGuiLuLFpCshdCiGLtT0Agu2anAbx2RjJo262xicnG95/ooCjq79fHasqFaYHgRvQqnYuIkz1NqQJsbB70lqFWrAHJddQhkefeRef82/Qpd4SDZnMvJ6d2XtvhJRr2ku6dHXQwqeQue2r/WV0A2onDarodNPfktd3PlRA/CzrEdmC+JLMZZnBp5HsCkibioZDzmDk3doCzsyiATm/cE8vvH+Z51HhNyEfZ3EFWABS5wT/u3DTtMUSxoPDm50pO0eG8P61eGgyk4nc96+m0W0YWabztgASnw7Ri9tPVnWnaURqcI6aeSrPkjutMuK7P5G4ChMP5hNlt8tcro="
+          secure: "gIBEnbcr88sK0rB1jJvc9PdqSCGwsEYsw2J74zAUb6y+2e/wRgGdA7LIYSaFhSrjqO7TSmvIZ6KnZqnypMZ8gEoXvngD5o9/n7FSP4SJpCq0q7nPafm/wI9S8Uk9RgZghHZdR4W/UzZnK/Q1MZ4n7lK2t64xn8xRROpuEpNlrJtizQnW3a4taISDnDiQvvtHqivpR6OmFZCBL4U21VIQ6rQoJZDX8FzIjqYJ/2H0DtZWoQ9JkTmzlrf60B0pVPHdZfsv7St0Qxj5KdTMRg7sFOUnWechM770y8C+kC8tsTlf5t1QSdT0QQJkX+iKD2VbKyhHs49LxIaPa3Gf0jBE/BHe04gtcGuiLuLFpCshdCiGLtT0Agu2anAbx2RjJo262xicnG95/ooCjq79fHasqFaYHgRvQqnYuIkz1NqQJsbB70lqFWrAHJddQhkefeRef82/Qpd4SDZnMvJ6d2XtvhJRr2ku6dHXQwqeQue2r/WV0A2onDarodNPfktd3PlRA/CzrEdmC+JLMZZnBp5HsCkibioZDzmDk3doCzsyiATm/cE8vvH+Z51HhNyEfZ3EFWABS5wT/u3DTtMUSxoPDm50pO0eG8P61eGgyk4nc96+m0W0YWabztgASnw7Ri9tPVnWnaURqcI6aeSrPkjutMuK7P5G4ChMP5hNlt8tcro="
