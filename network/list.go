@@ -39,7 +39,7 @@ func (c *Client) List() ([]Network, error) {
 				return nil
 			}
 
-			//If we use k directly, the pointer to k will be lost after the List
+			//If we use k directly, the pointer to k will be lost after the List function returns
 			n := Network{
 				IP: net.ParseIP(((net.IP)(k)).String()),
 			}
