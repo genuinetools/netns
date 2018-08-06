@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"net"
 
 	"github.com/boltdb/bolt"
 	"github.com/vishvananda/netns"
@@ -18,7 +19,7 @@ func (c *Client) List() ([]Network, error) {
 		return nil, err
 	}
 	defer c.db.Close()
-	
+
 	if c.db == nil {
 		return nil, errors.New("no networks found")
 	}
@@ -40,6 +41,9 @@ func (c *Client) List() ([]Network, error) {
 			n := Network{
 				IP: k,
 			}
+
+			//We need to parse, or the pointer to k will be lost
+			n.IP = net.ParseIP(n.IP.String())
 
 			// Get the pid.
 			n.PID, err = strconv.Atoi(string(v))
