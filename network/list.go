@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"net"
 
 	"github.com/boltdb/bolt"
 	"github.com/vishvananda/netns"
@@ -37,8 +38,11 @@ func (c *Client) List() ([]Network, error) {
 				return nil
 			}
 
+			// If we use k directly, the pointer to k will be lost after the List function return.
+			var ip net.IP
+			copy(ip, k)
 			n := Network{
-				IP: k,
+				IP: ip,
 			}
 
 			// Get the pid.
