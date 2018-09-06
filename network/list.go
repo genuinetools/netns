@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"strconv"
+	"net"
 
 	"github.com/boltdb/bolt"
 	"github.com/vishvananda/netns"
@@ -13,14 +14,16 @@ import (
 // List returns the ip addresses being used from the database for the networks
 // with the specified bridge name.
 func (c *Client) List() ([]Network, error) {
-	if c.db == nil {
-		return nil, errors.New("no networks found")
-	}
 	// Open the database.
 	if err := c.openDB(true); err != nil {
 		return nil, err
 	}
 	defer c.db.Close()
+
+	//We should check after openDB, or the db field will be nil forever.
+	if c.db == nil {
+		return nil, errors.New("no networks found")
+	}
 
 	var (
 		networks = []Network{}
@@ -36,8 +39,9 @@ func (c *Client) List() ([]Network, error) {
 				return nil
 			}
 
+			//If we use k directly, the pointer to k will be lost after the List function returns
 			n := Network{
-				IP: k,
+				IP: net.ParseIP(((net.IP)(k)).String()),
 			}
 
 			// Get the pid.
