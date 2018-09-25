@@ -11,11 +11,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:d823ba22a1d65577a8f5cc30c3c19255fdfc6f0c0d442b281b8dd2203880d51a"
+  digest = "1:ea4ce4151ae1737a3c55a4209f3f4ea164e5e595ac984c6e5a526c3022538fc1"
   name = "github.com/docker/libnetwork"
   packages = ["iptables"]
   pruneopts = "NUT"
-  revision = "aa9d690e0a33562230a3c370f5fcf099d1eb6b16"
+  revision = "20461b8539336a4b5fcf551a86dd24ebae211984"
 
 [[projects]]
   branch = "master"
@@ -27,11 +27,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:26bac590d2ee7a8ace363d3b8f84e3f790e732470ba54995c9bf722827fc96c4"
+  digest = "1:bd228d1a02fffcaf3abca973886870113d843ea7a67d5b6f70a5169950499ea9"
   name = "github.com/genuinetools/pkg"
   packages = ["cli"]
   pruneopts = "NUT"
-  revision = "965f911b80a9f4d3b446685164fefec44ecacd15"
+  revision = "1c141f661797b5fb22033c9a7a5ab004994a0404"
 
 [[projects]]
   digest = "1:ca3369c0fc8d471d8698f85a37a4f8c98a847402681a31431fb87a84fa2e5373"
@@ -47,7 +47,7 @@
   name = "github.com/opencontainers/runc"
   packages = ["libcontainer/configs"]
   pruneopts = "NUT"
-  revision = "21ac0862f2c695f7ecb55346401932a9ad8cc8d6"
+  revision = "00dc70017d222b178a002ed30e9321b12647af2d"
 
 [[projects]]
   digest = "1:57234a321bf1f8f98a8a9a5122a2404cc60d0800516f4ab7a7b2375e4b2d19ea"
@@ -58,15 +58,15 @@
   version = "v1.0.1"
 
 [[projects]]
-  digest = "1:6989062eb7ccf25cf38bf4fe3dba097ee209f896cda42cefdca3927047bef7b6"
+  digest = "1:b2339e83ce9b5c4f79405f949429a7f68a9a904fed903c672aac1e7ceb7f5f02"
   name = "github.com/sirupsen/logrus"
   packages = ["."]
   pruneopts = "NUT"
-  revision = "c155da19408a8799da419ed3eeb0cb5db0ad5dbc"
-  version = "v1.0.5"
+  revision = "3e01752db0189b9157070a0e1668a620f9a85da2"
+  version = "v1.0.6"
 
 [[projects]]
-  digest = "1:f7652bcc38ae63ce35025d4317184ec1c45f16737547a5993f2b50be490af4e1"
+  digest = "1:936ab0fd3f16edc83131e626594a4f4e75426e5adeb7adbe57ed203db4c1b950"
   name = "github.com/vishvananda/netlink"
   packages = [
     ".",
@@ -78,11 +78,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:cfa9b2092e9b5f46feaa6c0d7a957618cd74d26cb2a72e3638f3ead773b23854"
+  digest = "1:2a1bbe57bb2602803e0f142d88453b0d9fec89e496aaa2cd8807bcae2e05a4a7"
   name = "github.com/vishvananda/netns"
   packages = ["."]
   pruneopts = "NUT"
-  revision = "be1fbeda19366dea804f00efff2dd73a1642fdcc"
+  revision = "13995c7128ccc8e51e9a6bd2b551020a27180abd"
 
 [[projects]]
   branch = "master"
@@ -90,18 +90,18 @@
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
   pruneopts = "NUT"
-  revision = "a49355c7e3f8fe157a85be2f77e6e269a0f89602"
+  revision = "0e37d006457bf46f9e6692014ba72ef82c33022c"
 
 [[projects]]
   branch = "master"
-  digest = "1:64107e3c8f52f341891a565d117bf263ed396fe0c16bad19634b25be25debfaa"
+  digest = "1:16c7423676f53021ecdec1e73a3c69f50e11c5b4988388940e7cb1634276755d"
   name = "golang.org/x/sys"
   packages = [
     "unix",
     "windows",
   ]
   pruneopts = "NUT"
-  revision = "ac767d655b305d4e9612f5f6e33120b9176c4ad4"
+  revision = "b09afc3d579e346c4a7e4705953acaf6f9e551bd"
 
 [solve-meta]
   analyzer-name = "dep"
