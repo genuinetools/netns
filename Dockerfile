@@ -14,7 +14,7 @@ RUN set -x \
 		git \
 		gcc \
 		libc-dev \
-		linux-headers
+		linux-headers \
 		libgcc \
 		make \
 	&& cd /go/src/github.com/genuinetools/netns \
