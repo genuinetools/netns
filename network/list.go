@@ -3,9 +3,9 @@ package network
 import (
 	"errors"
 	"fmt"
+	"net"
 	"os"
 	"strconv"
-	"net"
 
 	"github.com/boltdb/bolt"
 	"github.com/vishvananda/netns"
