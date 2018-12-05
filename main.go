@@ -47,8 +47,9 @@ const (
 )
 
 var (
-	arg    string
-	ipfile string
+	arg      string
+	ipfile   string
+	staticip string
 
 	netOpt network.Opt
 	brOpt  bridge.Opt
@@ -86,6 +87,7 @@ func main() {
 	p.FlagSet.IntVar(&brOpt.MTU, "mtu", bridge.DefaultMTU, "mtu for bridge")
 
 	p.FlagSet.BoolVar(&debug, "d", false, "enable debug logging")
+	p.FlagSet.StringVar(&staticip, "static-ip", "", "Enable static IP Address")
 
 	// Set the before function.
 	p.Before = func(ctx context.Context) error {
@@ -109,7 +111,7 @@ func main() {
 			return err
 		}
 
-		ip, err := client.Create(hook, brOpt)
+		ip, err := client.Create(hook, brOpt, staticip)
 		if err != nil {
 			return err
 		}
