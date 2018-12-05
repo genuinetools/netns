@@ -32,7 +32,7 @@ func TestCreateNetwork(t *testing.T) {
 	}, bridge.Opt{
 		IPAddr: defaultBridgeIP,
 		Name:   defaultBridgeName,
-	})
+	}, "")
 	if err != nil {
 		t.Fatal(err)
 	}
