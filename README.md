@@ -6,10 +6,9 @@
 
 Runc hook for setting up default bridge networking.
 
- * [Installation](README.md#installation)
-      * [Binaries](README.md#binaries)
-      * [Via Go](README.md#via-go)
- * [Usage](README.md#usage)
+<!-- toc -->
+
+<!-- tocstop -->
 
 ## Installation
 
