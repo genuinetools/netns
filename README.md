@@ -8,6 +8,11 @@ Runc hook for setting up default bridge networking.
 
 <!-- toc -->
 
+- [Installation](#installation)
+    + [Binaries](#binaries)
+    + [Via Go](#via-go)
+- [Usage](#usage)
+
 <!-- tocstop -->
 
 ## Installation
