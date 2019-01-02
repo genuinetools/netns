@@ -72,7 +72,7 @@ func (c *Client) AllocateIP(pid int) (ip net.IP, err error) {
 					}
 					return nil
 				}); err != nil {
-					return nil, fmt.Errorf("Adding ip %s to database for %d failed: %v", ip.String(), pid, err)
+					return nil, fmt.Errorf("adding ip %s to database for %d failed: %v", ip.String(), pid, err)
 				}
 				logrus.Debugf("[ipallocator] ip %s is selected.", ip.String())
 
@@ -101,12 +101,12 @@ func (c *Client) getIPMap() (map[string]struct{}, error) {
 	if c.ipNet.IP.To4() == nil {
 		list, err = netlink.NeighList(c.bridge.Index, netlink.FAMILY_V6)
 		if err != nil {
-			return nil, fmt.Errorf("Cannot retrieve IPv6 neighbor information for interface %s: %v", c.bridge.Name, err)
+			return nil, fmt.Errorf("cannot retrieve IPv6 neighbor information for interface %s: %v", c.bridge.Name, err)
 		}
 	} else {
 		list, err = netlink.NeighList(c.bridge.Index, netlink.FAMILY_V4)
 		if err != nil {
-			return nil, fmt.Errorf("Cannot retrieve IPv4 neighbor information for interface %s: %v", c.bridge.Name, err)
+			return nil, fmt.Errorf("cannot retrieve IPv4 neighbor information for interface %s: %v", c.bridge.Name, err)
 		}
 	}
 

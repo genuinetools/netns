@@ -17,37 +17,12 @@ import (
 )
 
 const (
-	// BANNER is what is printed for help/info output
-	BANNER = `            _
- _ __   ___| |_ _ __  ___
-| '_ \ / _ \ __| '_ \/ __|
-| | | |  __/ |_| | | \__ \
-|_| |_|\___|\__|_| |_|___/
-
- Runc hook for setting up default bridge networking.
- Version: %s
-
- Netns provides the following commands. Usage format:
-
-    netns [-flag value] [-flag value] command
-
-  Where command is one of:
-
-    createbr, delbr, [ls|list], delete
-
-  If command is blank (e.g. when called via a hook) it
-  will create a network endpoint in the expected net
-  namespace details for that PID.
-
-`
-
 	defaultBridgeName = "netns0"
 	defaultBridgeIP   = "172.19.0.1/16"
 	defaultStateDir   = "/run/github.com/genuinetools/netns"
 )
 
 var (
-	arg      string
 	ipfile   string
 	staticip string
 
