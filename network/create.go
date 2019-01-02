@@ -16,7 +16,8 @@ import (
 
 // Create returns a container IP that was created with the given bridge name,
 // the settings from the HookState passed, and the bridge options.
-func (c *Client) Create(hook configs.HookState, brOpt bridge.Opt) (net.IP, error) {
+func (c *Client) Create(hook configs.HookState, brOpt bridge.Opt, staticip string) (net.IP, error) {
+	var nsip net.IP
 	// Open the database.
 	if err := c.openDB(false); err != nil {
 		return nil, err
@@ -79,7 +80,12 @@ func (c *Client) Create(hook configs.HookState, brOpt bridge.Opt) (net.IP, error
 		return nil, err
 	}
 
-	nsip, err := c.AllocateIP(hook.Pid)
+	if staticip != "" {
+		nsip = net.ParseIP(staticip)
+	} else {
+		nsip, err = c.AllocateIP(hook.Pid)
+	}
+
 	if err != nil {
 		return nil, fmt.Errorf("allocating ip address failed: %v", err)
 	}
