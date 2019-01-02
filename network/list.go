@@ -6,6 +6,7 @@ import (
 	"net"
 	"os"
 	"strconv"
+	"strings"
 
 	"github.com/vishvananda/netns"
 	bolt "go.etcd.io/bbolt"
@@ -16,6 +17,11 @@ import (
 func (c *Client) List() ([]Network, error) {
 	// Open the database.
 	if err := c.openDB(true); err != nil {
+		// When it cannot write to the db because it has not been created return
+		// early.
+		if strings.Contains(err.Error(), "bad file descriptor") {
+			return nil, errors.New("no networks found")
+		}
 		return nil, err
 	}
 	defer c.db.Close()
