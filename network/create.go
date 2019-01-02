@@ -5,13 +5,13 @@ import (
 	"net"
 	"runtime"
 
-	"github.com/boltdb/bolt"
 	"github.com/genuinetools/netns/bridge"
 	"github.com/genuinetools/netns/netutils"
 	"github.com/opencontainers/runc/libcontainer/configs"
 	"github.com/sirupsen/logrus"
 	"github.com/vishvananda/netlink"
 	"github.com/vishvananda/netns"
+	bolt "go.etcd.io/bbolt"
 )
 
 // Create returns a container IP that was created with the given bridge name,

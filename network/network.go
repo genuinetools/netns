@@ -7,9 +7,9 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/boltdb/bolt"
 	"github.com/vishvananda/netlink"
 	"github.com/vishvananda/netns"
+	bolt "go.etcd.io/bbolt"
 )
 
 const (

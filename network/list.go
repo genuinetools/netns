@@ -7,8 +7,8 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/boltdb/bolt"
 	"github.com/vishvananda/netns"
+	bolt "go.etcd.io/bbolt"
 )
 
 // List returns the ip addresses being used from the database for the networks
