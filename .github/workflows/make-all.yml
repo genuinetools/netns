@@ -9,8 +9,8 @@ jobs:
           sudo add-apt-repository ppa:longsleep/golang-backports
           sudo apt-get update
           sudo apt-get install golang-go
-          go get honnef.co/go/tools/cmd/staticcheck
-          go get golang.org/x/lint/golint
+          go get honnef.co/go/tools/cmd/staticcheck || true
+          go get golang.org/x/lint/golint || true
       - uses: actions/checkout@master
       - name: make all
         shell: bash
