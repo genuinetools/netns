@@ -6,11 +6,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - run: |
-        sudo add-apt-repository ppa:longsleep/golang-backports
-        sudo apt-get update
-        sudo apt-get install golang-go
-        go get honnef.co/go/tools/cmd/staticcheck
-        go get golang.org/x/lint/golint
+          sudo add-apt-repository ppa:longsleep/golang-backports
+          sudo apt-get update
+          sudo apt-get install golang-go
+          go get honnef.co/go/tools/cmd/staticcheck
+          go get golang.org/x/lint/golint
       - uses: actions/checkout@master
       - name: make all
         shell: bash
