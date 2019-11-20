@@ -1,19 +1,14 @@
 # netns
 
-[![Travis CI](https://img.shields.io/travis/genuinetools/netns.svg?style=for-the-badge)](https://travis-ci.org/genuinetools/netns)
+![make-all](https://github.com/genuinetools/netns/workflows/make%20all/badge.svg)
+![make-image](https://github.com/genuinetools/netns/workflows/make%20image/badge.svg)
 [![GoDoc](https://img.shields.io/badge/godoc-reference-5272B4.svg?style=for-the-badge)](https://godoc.org/github.com/genuinetools/netns)
 [![Github All Releases](https://img.shields.io/github/downloads/genuinetools/netns/total.svg?style=for-the-badge)](https://github.com/genuinetools/netns/releases)
 
 Runc hook for setting up default bridge networking.
 
-<!-- toc -->
-
-- [Installation](#installation)
-    + [Binaries](#binaries)
-    + [Via Go](#via-go)
-- [Usage](#usage)
-
-<!-- tocstop -->
+<!-- START doctoc -->
+<!-- END doctoc -->
 
 ## Installation
 
