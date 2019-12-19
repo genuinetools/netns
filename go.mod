@@ -1,7 +1,6 @@
 module github.com/genuinetools/netns
 
 require (
-	github.com/boltdb/bolt v1.3.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/docker/libnetwork v0.0.0-20180914141841-20461b853933
 	github.com/erikh/ping v0.0.0-20141209185752-d731d249e12a
@@ -15,9 +14,9 @@ require (
 	github.com/stretchr/testify v1.2.2 // indirect
 	github.com/vishvananda/netlink v1.0.0
 	github.com/vishvananda/netns v0.0.0-20180720170159-13995c7128cc
-	go.etcd.io/bbolt v1.3.0
+	go.etcd.io/bbolt v1.3.3
 	golang.org/x/crypto v0.0.0-20180910181607-0e37d006457b // indirect
-	golang.org/x/sys v0.0.0-20180925112736-b09afc3d579e // indirect
+	golang.org/x/sys v0.0.0-20191218084908-4a24b4065292 // indirect
 	gopkg.in/airbrake/gobrake.v2 v2.0.9 // indirect
 	gopkg.in/gemnasium/logrus-airbrake-hook.v2 v2.1.2 // indirect
 )

@@ -17,10 +17,10 @@ github.com/vishvananda/netlink
 github.com/vishvananda/netlink/nl
 # github.com/vishvananda/netns v0.0.0-20180720170159-13995c7128cc
 github.com/vishvananda/netns
-# go.etcd.io/bbolt v1.3.0
+# go.etcd.io/bbolt v1.3.3
 go.etcd.io/bbolt
 # golang.org/x/crypto v0.0.0-20180910181607-0e37d006457b
 golang.org/x/crypto/ssh/terminal
-# golang.org/x/sys v0.0.0-20180925112736-b09afc3d579e
+# golang.org/x/sys v0.0.0-20191218084908-4a24b4065292
 golang.org/x/sys/unix
 golang.org/x/sys/windows
