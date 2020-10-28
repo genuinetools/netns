@@ -47,6 +47,7 @@ Flags:
   -d           enable debug logging (default: false)
   --iface      name of interface in the namespace (default: eth0)
   --ip         ip address for bridge (default: 172.19.0.1/16)
+  --static-ip  Enable static IP Address (default: <none>)
 
 Commands:
 
@@ -56,13 +57,13 @@ Commands:
   version  Show the version information.
 ```
 
-Place this in the `Hooks.Prestart` field of your `runc` config.
+Place this in the `Hooks.CreateRuntime` field of your `runc` config.
 
 ```json
 {
     ...
     "hooks": {
-        "prestart": [
+        "createRuntime": [
             {
                 "path": "/path/to/netns"
             }
