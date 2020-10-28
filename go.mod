@@ -15,7 +15,7 @@ require (
 	github.com/stretchr/testify v1.2.2 // indirect
 	github.com/vishvananda/netlink v1.0.0
 	github.com/vishvananda/netns v0.0.0-20180720170159-13995c7128cc
-	go.etcd.io/bbolt v1.3.0
+	go.etcd.io/bbolt v1.3.3
 	golang.org/x/crypto v0.0.0-20180910181607-0e37d006457b // indirect
 	golang.org/x/sys v0.0.0-20180925112736-b09afc3d579e // indirect
 	gopkg.in/airbrake/gobrake.v2 v2.0.9 // indirect
