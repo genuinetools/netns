@@ -8,7 +8,7 @@ import (
 	"testing"
 
 	"github.com/genuinetools/netns/bridge"
-	"github.com/opencontainers/runc/libcontainer/configs"
+	"github.com/opencontainers/runtime-spec/specs-go"
 )
 
 func TestCreateNetwork(t *testing.T) {
@@ -27,7 +27,7 @@ func TestCreateNetwork(t *testing.T) {
 	}
 	defer os.RemoveAll(defaultStateDir)
 
-	ip, err := c.Create(configs.HookState{
+	ip, err := c.Create(&specs.State{
 		Pid: process.Pid,
 	}, bridge.Opt{
 		IPAddr: defaultBridgeIP,

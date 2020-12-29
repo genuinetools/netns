@@ -6,8 +6,6 @@ github.com/erikh/ping
 github.com/genuinetools/pkg/cli
 # github.com/godbus/dbus v4.1.0+incompatible
 github.com/godbus/dbus
-# github.com/opencontainers/runc v0.0.0-20180920170208-00dc70017d22
-github.com/opencontainers/runc/libcontainer/configs
 # github.com/opencontainers/runtime-spec v1.0.1
 github.com/opencontainers/runtime-spec/specs-go
 # github.com/sirupsen/logrus v1.0.6

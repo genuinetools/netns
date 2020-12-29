@@ -12,7 +12,7 @@ import (
 	"github.com/genuinetools/netns/network"
 	"github.com/genuinetools/netns/version"
 	"github.com/genuinetools/pkg/cli"
-	"github.com/opencontainers/runc/libcontainer/configs"
+	"github.com/opencontainers/runtime-spec/specs-go"
 	"github.com/sirupsen/logrus"
 )
 
@@ -81,12 +81,12 @@ func main() {
 
 	// Set the main program action.
 	p.Action = func(ctx context.Context, args []string) error {
-		hook, err := readHookData()
+		s, err := readHookData()
 		if err != nil {
 			return err
 		}
 
-		ip, err := client.Create(hook, brOpt, staticip)
+		ip, err := client.Create(s, brOpt, staticip)
 		if err != nil {
 			return err
 		}
@@ -103,20 +103,20 @@ func main() {
 	p.Run()
 }
 
-// readHookData decodes stdin as HookState.
-func readHookData() (hook configs.HookState, err error) {
+// readHookData decodes stdin as *spec.State.
+func readHookData() (s *specs.State, err error) {
 	// Read hook data from stdin.
 	b, err := ioutil.ReadAll(os.Stdin)
 	if err != nil {
-		return hook, fmt.Errorf("reading hook data from stdin failed: %v", err)
+		return s, fmt.Errorf("reading hook data from stdin failed: %v", err)
 	}
 
 	// Umarshal the hook state.
-	if err := json.Unmarshal(b, &hook); err != nil {
-		return hook, fmt.Errorf("unmarshaling stdin as HookState failed: %v", err)
+	if err := json.Unmarshal(b, &s); err != nil {
+		return s, fmt.Errorf("unmarshaling stdin as specs.State failed: %v", err)
 	}
 
-	logrus.Debugf("hooks state: %#v", hook)
+	logrus.Debugf("hooks state: %#v", s)
 
-	return hook, nil
+	return s, nil
 }
