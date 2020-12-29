@@ -7,7 +7,7 @@ import (
 
 	"github.com/genuinetools/netns/bridge"
 	"github.com/genuinetools/netns/netutils"
-	"github.com/opencontainers/runc/libcontainer/configs"
+	"github.com/opencontainers/runtime-spec/specs-go"
 	"github.com/sirupsen/logrus"
 	"github.com/vishvananda/netlink"
 	"github.com/vishvananda/netns"
@@ -15,8 +15,8 @@ import (
 )
 
 // Create returns a container IP that was created with the given bridge name,
-// the settings from the HookState passed, and the bridge options.
-func (c *Client) Create(hook configs.HookState, brOpt bridge.Opt, staticip string) (net.IP, error) {
+// the settings from the spec.State passed, and the bridge options.
+func (c *Client) Create(s *specs.State, brOpt bridge.Opt, staticip string) (net.IP, error) {
 	var nsip net.IP
 	// Open the database.
 	if err := c.openDB(false); err != nil {
@@ -32,9 +32,9 @@ func (c *Client) Create(hook configs.HookState, brOpt bridge.Opt, staticip strin
 	}
 
 	// Create and attach local name to the bridge.
-	localVethPair, err := c.vethPair(hook.Pid, c.opt.BridgeName)
+	localVethPair, err := c.vethPair(s.Pid, c.opt.BridgeName)
 	if err != nil {
-		return nil, fmt.Errorf("getting vethpair for pid %d failed: %v", hook.Pid, err)
+		return nil, fmt.Errorf("getting vethpair for pid %d failed: %v", s.Pid, err)
 	}
 	if err := netlink.LinkAdd(localVethPair); err != nil {
 		return nil, fmt.Errorf("create veth pair named [ %#v ] failed: %v", localVethPair, err)
@@ -47,8 +47,8 @@ func (c *Client) Create(hook configs.HookState, brOpt bridge.Opt, staticip strin
 	}
 
 	// Put peer interface into the network namespace of specified PID.
-	if err := netlink.LinkSetNsPid(peer, hook.Pid); err != nil {
-		return nil, fmt.Errorf("adding peer interface to network namespace of pid %d failed: %v", hook.Pid, err)
+	if err := netlink.LinkSetNsPid(peer, s.Pid); err != nil {
+		return nil, fmt.Errorf("adding peer interface to network namespace of pid %d failed: %v", s.Pid, err)
 	}
 
 	// Bring the veth pair up.
@@ -83,7 +83,7 @@ func (c *Client) Create(hook configs.HookState, brOpt bridge.Opt, staticip strin
 	if staticip != "" {
 		nsip = net.ParseIP(staticip)
 	} else {
-		nsip, err = c.AllocateIP(hook.Pid)
+		nsip, err = c.AllocateIP(s.Pid)
 	}
 
 	if err != nil {
@@ -96,7 +96,7 @@ func (c *Client) Create(hook configs.HookState, brOpt bridge.Opt, staticip strin
 	}
 
 	// Configure the interface in the network namespace.
-	if err := c.configureInterface(localVethPair.PeerName, hook.Pid, newIP, ip.String()); err != nil {
+	if err := c.configureInterface(localVethPair.PeerName, s.Pid, newIP, ip.String()); err != nil {
 		return nil, err
 	}
 
