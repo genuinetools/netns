@@ -184,6 +184,7 @@ func (c *Client) vethPair(pid int, bridgeName string) (*netlink.Veth, error) {
 
 	la := netlink.NewLinkAttrs()
 	la.Name = fmt.Sprintf("%s-%d", c.opt.PortPrefix, pid)
+	la.MTU = br.Attrs().MTU
 	la.MasterIndex = br.Attrs().Index
 
 	return &netlink.Veth{
